@@ -69,6 +69,19 @@ describe("applyPatches", () => {
     expect(rootDom.outerHTML).toBe("<div><span>first</span></div>");
   });
 
+  it("루트 Text DOM에도 TEXT 패치를 적용한다", () => {
+    // given
+    const rootDom = document.createTextNode("before");
+
+    // when
+    const patchedRoot = applyPatches(rootDom, diff(textNode("before"), textNode("after")));
+
+    // then
+    expect(patchedRoot).toBe(rootDom);
+    expect(patchedRoot.nodeType).toBe(Node.TEXT_NODE);
+    expect(patchedRoot.textContent).toBe("after");
+  });
+
   it("잘못된 patch 입력이면 일관된 TypeError를 던진다", () => {
     const rootDom = document.createElement("div");
 

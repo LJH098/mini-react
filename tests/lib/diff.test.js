@@ -78,6 +78,24 @@ describe("diff", () => {
     ]);
   });
 
+  it("루트 텍스트가 바뀌면 path가 빈 TEXT 패치를 만든다", () => {
+    // given
+    const oldVdom = textNode("before");
+    const newVdom = textNode("after");
+
+    // when
+    const actual = diff(oldVdom, newVdom);
+
+    // then
+    expect(actual).toEqual([
+      {
+        type: PatchType.TEXT,
+        path: [],
+        value: "after",
+      },
+    ]);
+  });
+
   it("잘못된 vnode 입력이면 일관된 TypeError를 던진다", () => {
     expect(() => diff({}, {})).toThrowError(new TypeError("Invalid vnode."));
     expect(() => diff(null, {})).toThrowError(new TypeError("Invalid vnode."));

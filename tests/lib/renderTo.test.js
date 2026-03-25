@@ -48,6 +48,22 @@ describe("renderTo", () => {
     expect(container.textContent).toBe("Fresh content");
   });
 
+  it("루트에 텍스트 vnode가 와도 컨테이너에 바로 렌더링한다", () => {
+    // given
+    const container = document.createElement("div");
+    const vdom = textNode("Root text");
+
+    container.innerHTML = "<p>old</p>";
+
+    // when
+    renderTo(container, vdom);
+
+    // then
+    expect(container.childNodes).toHaveLength(1);
+    expect(container.firstChild?.nodeType).toBe(Node.TEXT_NODE);
+    expect(container.textContent).toBe("Root text");
+  });
+
   it("renderTo 결과가 단독 변환 결과와 같고 왕복 구조를 유지한다", () => {
     // given
     const container = document.createElement("div");
