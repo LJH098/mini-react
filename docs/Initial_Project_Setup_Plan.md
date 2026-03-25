@@ -27,7 +27,6 @@ src/
   constants.js
   lib.js
   history.js
-  main.js
   lib.test.js
 ```
 
@@ -57,10 +56,16 @@ export const NodeType = Object.freeze({
   ELEMENT: "ELEMENT_NODE",
 });
 
+/**
+ * 담당: 위승철
+ */
 export function textNode(value) {
   return { nodeType: NodeType.TEXT, value };
 }
 
+/**
+ * 담당: 위승철
+ */
 export function elementNode(type, props = {}, children = []) {
   return { nodeType: NodeType.ELEMENT, type, props, children };
 }
@@ -81,22 +86,37 @@ export const PatchType = Object.freeze({
 ```js
 export { NodeType, PatchType, textNode, elementNode } from "./constants.js";
 
+/**
+ * 담당: 위승철
+ */
 export function domToVdom(domNode) {
   // TODO
 }
 
+/**
+ * 담당: 위승철
+ */
 export function vdomToDom(vnode) {
   // TODO
 }
 
+/**
+ * 담당: 위승철
+ */
 export function renderTo(container, vdom) {
   // TODO
 }
 
-export function diff(oldVdom, newVdom, path = []) {
+/**
+ * 담당: 이진혁
+ */
+export function diff(oldVdom, newVdom) {
   // TODO
 }
 
+/**
+ * 담당: 이진혁
+ */
 export function applyPatches(rootDom, patches) {
   // TODO
 }
@@ -105,6 +125,9 @@ export function applyPatches(rootDom, patches) {
 ## 6. `src/history.js` 시그니처
 
 ```js
+/**
+ * 담당: 양시준
+ */
 export function createHistory(initialVdom) {
   // TODO
 }
@@ -125,27 +148,7 @@ export function createHistory(initialVdom) {
 }
 ```
 
-## 7. `src/main.js` 초기 구성
-
-실행 코드 진입점만 만든다.
-
-```js
-import { elementNode, textNode, renderTo } from "./lib.js";
-
-const app = document.querySelector("#app");
-
-const initialVdom = elementNode("div", {}, [
-  textNode("TODO"),
-]);
-
-renderTo(app, initialVdom);
-```
-
-주의:
-
-- 이 코드는 `renderTo`가 구현되기 전까지는 실행용 자리만 잡는 수준이다.
-
-## 8. `src/lib.test.js` 초기 구성
+## 7. `src/lib.test.js` 초기 구성
 
 테스트 파일도 구조만 먼저 만든다.
 
@@ -171,24 +174,15 @@ describe("placeholder", () => {
 });
 ```
 
-## 9. `index.html` 초기 구성
+## 8. `index.html` 초기 구성
 
-```html
-<!doctype html>
-<html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dom-vdom</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-</html>
-```
+- 담당: 양시준
+- 데모 UI 범위는 `index.html`, CSS 구성까지 포함한다.
+- 별도 `src/main.js`는 두지 않는다.
+- `index.html`에서 `src/lib.js`를 직접 모듈로 연결해 사용한다.
+- 이 문서에는 그 연결 방식에 대한 예시 코드는 포함하지 않는다.
 
-## 10. 구현 시작 순서
+## 9. 구현 시작 순서
 
 1. `constants.js`
 2. `lib.js`의 `vdomToDom`
@@ -199,7 +193,7 @@ describe("placeholder", () => {
 7. `history.js`
 8. 테스트 보강
 
-## 11. 이 문서의 범위
+## 10. 이 문서의 범위
 
 이 문서는 아래만 다룬다.
 
