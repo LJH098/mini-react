@@ -120,35 +120,26 @@
         border-right: 1px solid #d0d0d0;
       }
 
-      .split-row {
+      .split-body {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .split-row + .split-row {
-        border-top: 1px solid #e5e7eb;
+      .split-body .code-block {
+        border-top: 0;
+        border-radius: 0;
       }
 
-      .split-cell {
-        min-height: 20px;
-        padding: 4px 8px;
-        overflow: auto;
-        white-space: pre;
-        font-family: "SFMono-Regular", "JetBrains Mono", monospace;
-        font-size: 13px;
-        line-height: 1.5;
+      .split-body .code-block:first-child {
+        border-right: 1px solid #d0d0d0;
       }
 
-      .split-cell:first-child {
-        border-right: 1px solid #e5e7eb;
-      }
-
-      .split-cell.added {
+      .code-line.added {
         background: #15391e;
         color: #d9ffe3;
       }
 
-      .split-cell.removed {
+      .code-line.removed {
         background: #452021;
         color: #ffd9db;
       }
@@ -194,12 +185,12 @@
         }
 
         .split-head,
-        .split-row {
+        .split-body {
           grid-template-columns: 1fr;
         }
 
         .split-head div:first-child,
-        .split-cell:first-child {
+        .split-body .code-block:first-child {
           border-right: 0;
         }
       }
@@ -241,7 +232,7 @@
         textNode,
       } from "/src/lib.js";
       import {
-        formatSplitViewRows,
+        formatSnapshotComparison,
         formatPatch,
         formatPatchTitle,
       } from "/src/ui-helper.js";
@@ -300,23 +291,24 @@
         return { title, vdom };
       }
 
-      function getEditableRootNode() {
-        return Array.from(testArea.childNodes).find((node) => {
-          return node.nodeType === Node.ELEMENT_NODE || normalizeText(node.textContent);
-        });
-      }
-
       // 편집 가능한 영역은 contenteditable DOM이므로,
-      // 패널 안의 실제 첫 루트 노드를 읽어서 domToVdom으로 다시 vDOM 스냅샷으로 변환한다.
-      // 여기서 innerHTML을 임시 div로 다시 감싸면 div 루트가 한 겹 더 생긴다.
+      // 패널 안의 실제 루트 노드를 읽어서 vDOM 스냅샷으로 변환한다.
+      // contenteditable이 래퍼 div를 깨뜨릴 수 있으므로,
+      // div가 사라진 경우 모든 자식을 div로 다시 감싼다.
       function readEditorSnapshot() {
-        const rootNode = getEditableRootNode();
+        const firstElement = Array.from(testArea.childNodes).find(
+          (node) => node.nodeType === Node.ELEMENT_NODE,
+        );
 
-        if (!rootNode) {
-          return createSnapshot(elementNode("div", {}, []));
+        if (firstElement && firstElement.tagName.toLowerCase() === "div") {
+          return createSnapshot(domToVdom(firstElement));
         }
 
-        return createSnapshot(domToVdom(rootNode));
+        const children = Array.from(testArea.childNodes)
+          .map((node) => domToVdom(node))
+          .filter((child) => child !== null);
+
+        return createSnapshot(elementNode("div", {}, children));
       }
 
       function renderSnapshotToEditor(snapshot) {
@@ -427,9 +419,10 @@
             const panel = document.createElement("div");
             panel.className = "history-panel";
             const patches = getHistoryPatches(entries, index);
-            const splitRows = formatSplitViewRows(
+            const { left, right } = formatSnapshotComparison(
               index > 0 ? entries[index - 1].vdom : null,
               entry.vdom,
+              patches,
             );
             const splitView = document.createElement("div");
             splitView.className = "split-view";
@@ -440,25 +433,10 @@
               </div>
             `;
 
-            splitRows.forEach((row) => {
-              const splitRow = document.createElement("div");
-              splitRow.className = "split-row";
-
-              const leftCell = document.createElement("div");
-              leftCell.className = row.left.type
-                ? `split-cell ${row.left.type}`
-                : "split-cell";
-              leftCell.textContent = row.left.text;
-
-              const rightCell = document.createElement("div");
-              rightCell.className = row.right.type
-                ? `split-cell ${row.right.type}`
-                : "split-cell";
-              rightCell.textContent = row.right.text;
-
-              splitRow.append(leftCell, rightCell);
-              splitView.append(splitRow);
-            });
+            const splitBody = document.createElement("div");
+            splitBody.className = "split-body";
+            splitBody.append(createCodeBlock(left), createCodeBlock(right));
+            splitView.append(splitBody);
 
             panel.append(splitView);
             const patchList = document.createElement("div");

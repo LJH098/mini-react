@@ -1,4 +1,4 @@
-import { NodeType } from "./constants.js";
+import { NodeType, PatchType } from "./constants.js";
 
 function formatPath(path = []) {
   return `[${path.join(", ")}]`;
@@ -79,135 +79,96 @@ function describeVdom(vnode) {
   return props ? `<${vnode.type} ${props}>` : `<${vnode.type}>`;
 }
 
-function appendTreeLines(vnode, prefix, isLast, lines) {
+function appendAnnotatedTreeLines(vnode, prefix, isLast, path, lines) {
   const connector = isLast ? "└─ " : "├─ ";
-  lines.push(`${prefix}${connector}${describeVdom(vnode)}`);
+  lines.push({ text: `${prefix}${connector}${describeVdom(vnode)}`, path });
 
   const children = vnode?.children ?? [];
   const nextPrefix = `${prefix}${isLast ? "   " : "│  "}`;
 
   children.forEach((child, index) => {
-    appendTreeLines(child, nextPrefix, index === children.length - 1, lines);
+    appendAnnotatedTreeLines(
+      child,
+      nextPrefix,
+      index === children.length - 1,
+      [...path, index],
+      lines,
+    );
   });
 }
 
-function vdomToTreeLines(vnode) {
+function buildAnnotatedTreeLines(vnode) {
   if (!vnode) {
     return [];
   }
 
-  const lines = [describeVdom(vnode)];
+  const lines = [{ text: describeVdom(vnode), path: [] }];
   const children = vnode.children ?? [];
 
   children.forEach((child, index) => {
-    appendTreeLines(child, "", index === children.length - 1, lines);
+    appendAnnotatedTreeLines(child, "", index === children.length - 1, [index], lines);
   });
 
   return lines;
 }
 
-function createOperations(leftLines, rightLines) {
-  const dp = Array.from({ length: leftLines.length + 1 }, () =>
-    Array(rightLines.length + 1).fill(0),
-  );
+function isPathAffected(linePath, affectedEntries) {
+  return affectedEntries.some(({ path: affectedPath, type }) => {
+    const isExactMatch =
+      linePath.length === affectedPath.length &&
+      affectedPath.every((v, i) => v === linePath[i]);
 
-  for (let leftIndex = leftLines.length - 1; leftIndex >= 0; leftIndex -= 1) {
-    for (let rightIndex = rightLines.length - 1; rightIndex >= 0; rightIndex -= 1) {
-      if (leftLines[leftIndex] === rightLines[rightIndex]) {
-        dp[leftIndex][rightIndex] = dp[leftIndex + 1][rightIndex + 1] + 1;
-      } else {
-        dp[leftIndex][rightIndex] = Math.max(
-          dp[leftIndex + 1][rightIndex],
-          dp[leftIndex][rightIndex + 1],
-        );
-      }
+    const isPrefixMatch =
+      linePath.length >= affectedPath.length &&
+      affectedPath.every((v, i) => v === linePath[i]);
+
+    switch (type) {
+      case PatchType.REPLACE:
+        return isExactMatch;
+      case PatchType.REMOVE:
+      case PatchType.ADD:
+        return isPrefixMatch;
+      default:
+        return isExactMatch;
     }
-  }
-
-  const operations = [];
-  let leftIndex = 0;
-  let rightIndex = 0;
-
-  while (leftIndex < leftLines.length && rightIndex < rightLines.length) {
-    if (leftLines[leftIndex] === rightLines[rightIndex]) {
-      operations.push({ kind: "same", text: leftLines[leftIndex] });
-      leftIndex += 1;
-      rightIndex += 1;
-      continue;
-    }
-
-    if (dp[leftIndex + 1][rightIndex] >= dp[leftIndex][rightIndex + 1]) {
-      operations.push({ kind: "removed", text: leftLines[leftIndex] });
-      leftIndex += 1;
-      continue;
-    }
-
-    operations.push({ kind: "added", text: rightLines[rightIndex] });
-    rightIndex += 1;
-  }
-
-  while (leftIndex < leftLines.length) {
-    operations.push({ kind: "removed", text: leftLines[leftIndex] });
-    leftIndex += 1;
-  }
-
-  while (rightIndex < rightLines.length) {
-    operations.push({ kind: "added", text: rightLines[rightIndex] });
-    rightIndex += 1;
-  }
-
-  return operations;
+  });
 }
 
-function createSplitRows(leftLines, rightLines) {
-  const operations = createOperations(leftLines, rightLines);
-  const rows = [];
-  let index = 0;
+export function formatSnapshotComparison(previousVdom, currentVdom, patches) {
+  const leftAnnotated = buildAnnotatedTreeLines(previousVdom);
+  const rightAnnotated = buildAnnotatedTreeLines(currentVdom);
 
-  while (index < operations.length) {
-    const current = operations[index];
+  const leftAffectedPaths = [];
+  const rightAffectedPaths = [];
 
-    if (current.kind === "same") {
-      rows.push({
-        left: { text: current.text, type: "" },
-        right: { text: current.text, type: "" },
-      });
-      index += 1;
-      continue;
-    }
+  for (const patch of patches) {
+    const path = patch.path;
 
-    const removed = [];
-    const added = [];
-
-    while (index < operations.length && operations[index].kind !== "same") {
-      if (operations[index].kind === "removed") {
-        removed.push(operations[index].text);
-      } else {
-        added.push(operations[index].text);
-      }
-
-      index += 1;
-    }
-
-    const limit = Math.max(removed.length, added.length);
-
-    for (let rowIndex = 0; rowIndex < limit; rowIndex += 1) {
-      rows.push({
-        left: {
-          text: removed[rowIndex] ?? "",
-          type: removed[rowIndex] ? "removed" : "",
-        },
-        right: {
-          text: added[rowIndex] ?? "",
-          type: added[rowIndex] ? "added" : "",
-        },
-      });
+    switch (patch.type) {
+      case PatchType.TEXT:
+      case PatchType.PROPS:
+      case PatchType.REPLACE:
+        leftAffectedPaths.push({ path, type: patch.type });
+        rightAffectedPaths.push({ path, type: patch.type });
+        break;
+      case PatchType.REMOVE:
+        leftAffectedPaths.push({ path, type: patch.type });
+        break;
+      case PatchType.ADD:
+        rightAffectedPaths.push({ path, type: patch.type });
+        break;
     }
   }
 
-  return rows;
-}
+  const left = leftAnnotated.map((line) => ({
+    text: line.text,
+    type: isPathAffected(line.path, leftAffectedPaths) ? "removed" : "",
+  }));
 
-export function formatSplitViewRows(previousVdom, currentVdom) {
-  return createSplitRows(vdomToTreeLines(previousVdom), vdomToTreeLines(currentVdom));
+  const right = rightAnnotated.map((line) => ({
+    text: line.text,
+    type: isPathAffected(line.path, rightAffectedPaths) ? "added" : "",
+  }));
+
+  return { left, right };
 }
