@@ -1,11 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from "vitest";
-import {
-  PatchType,
-  elementNode,
-  textNode,
-} from "../../src/constants.js";
+import { PatchType, elementNode, textNode } from "../../src/constants.js";
 import { applyPatches } from "../../src/lib/applyPatches.js";
 import { diff } from "../../src/lib/diff.js";
 import { domToVdom } from "../../src/lib/domToVdom.js";
@@ -51,9 +47,10 @@ function expectNoThrowAndSameDom(rootDom, patches) {
   expect(rootDom.outerHTML).toBe(before);
 }
 
-describe("edgeCases", () => {
+describe("엣지 케이스", () => {
   describe("최소 변경 보장", () => {
-    it("부분 업데이트 정확성: 바뀐 리프 텍스트에만 패치를 만든다", () => {
+    it("바뀐 리프 텍스트에만 패치를 만든다", () => {
+      // given
       const { root } = makeDom(`
         <div id="root">
           <span id="a">A</span>
@@ -72,8 +69,10 @@ describe("edgeCases", () => {
         elementNode("span", { id: "c" }, [textNode("C")]),
       ]);
 
+      // when
       const { patches } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(patches).toEqual([
         {
           type: PatchType.TEXT,
@@ -86,7 +85,8 @@ describe("edgeCases", () => {
       );
     });
 
-    it("리프 텍스트 변경 시 형제 DOM identity를 재사용한다", () => {
+    it("리프 텍스트가 바뀌어도 형제 DOM identity를 재사용한다", () => {
+      // given
       const { root } = makeDom(`
         <div id="root">
           <span id="a">A</span>
@@ -106,24 +106,32 @@ describe("edgeCases", () => {
         elementNode("span", { id: "c" }, [textNode("C")]),
       ]);
 
+      // when
       patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(root.childNodes[0]).toBe(before[0]);
       expect(root.childNodes[1]).toBe(before[1]);
       expect(root.childNodes[2]).toBe(before[2]);
     });
 
-    it("무변경 no-op: 동일 vnode를 비교하면 빈 배열을 반환한다", () => {
+    it("동일한 vnode를 비교하면 빈 배열을 반환한다", () => {
+      // given
       const vnode = elementNode("div", { id: "root" }, [
         elementNode("span", {}, [textNode("same")]),
       ]);
 
-      expect(diff(vnode, vnode)).toEqual([]);
+      // when
+      const actual = diff(vnode, vnode);
+
+      // then
+      expect(actual).toEqual([]);
     });
   });
 
   describe("구조 변경", () => {
-    it("부모 삭제 시 서브트리 하위 path 제거 없이 결과 DOM을 안전하게 정리한다", () => {
+    it("부모 삭제 시 서브트리를 안전하게 정리한다", () => {
+      // given
       const { root } = makeDom(`
         <div id="root">
           <section id="parent">
@@ -144,8 +152,10 @@ describe("edgeCases", () => {
         elementNode("p", {}, [textNode("C")]),
       ]);
 
+      // when
       const { patches } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(patches).toEqual([
         {
           type: PatchType.REPLACE,
@@ -165,7 +175,8 @@ describe("edgeCases", () => {
       expect(root.outerHTML).toBe('<div id="root"><p>C</p></div>');
     });
 
-    it("루트 기준 replace, remove, add를 현재 구현대로 처리한다", () => {
+    it("루트 기준 교체, 삭제, 추가를 현재 구현대로 처리한다", () => {
+      // given
       const replaceDom = makeDom('<div id="mount"><div id="root"><span>a</span></div></div>');
       const replaceOldVdom = elementNode("div", { id: "root" }, [
         elementNode("span", {}, [textNode("a")]),
@@ -173,12 +184,15 @@ describe("edgeCases", () => {
       const replaceNewVdom = elementNode("section", { id: "next" }, [
         textNode("b"),
       ]);
+
+      // when
       const { patches: replacePatches, nextRoot: replacedRoot } = patchFrom(
         replaceOldVdom,
         replaceNewVdom,
         replaceDom.mount.firstElementChild,
       );
 
+      // then
       expect(replacePatches).toEqual([
         {
           type: PatchType.REPLACE,
@@ -193,12 +207,15 @@ describe("edgeCases", () => {
       const removeOldVdom = elementNode("div", { id: "root" }, [
         elementNode("span", {}, [textNode("a")]),
       ]);
+
+      // when
       const { patches: removePatches, nextRoot: removedRoot } = patchFrom(
         removeOldVdom,
         null,
         removeDom.mount.firstElementChild,
       );
 
+      // then
       expect(removePatches).toEqual([
         {
           type: PatchType.REMOVE,
@@ -208,17 +225,20 @@ describe("edgeCases", () => {
       expect(removedRoot).toBeNull();
       expect(removeDom.mount.innerHTML).toBe("");
 
+      // when
       const addedRoot = applyPatches(
         null,
         diff(null, elementNode("br", {}, [])),
       );
       removeDom.mount.appendChild(addedRoot);
 
+      // then
       expect(addedRoot?.outerHTML).toBe("<br>");
       expect(removeDom.mount.innerHTML).toBe("<br>");
     });
 
-    it("앞쪽 삽입은 결과 DOM은 맞지만 뒤 형제 identity는 재사용하지 않는다", () => {
+    it("앞쪽 삽입 시 뒤 형제 identity를 재사용하지 않는다", () => {
+      // given
       const { root } = makeDom(`
         <div id="root">
           <span id="b">B</span>
@@ -236,8 +256,10 @@ describe("edgeCases", () => {
         elementNode("span", { id: "c" }, [textNode("C")]),
       ]);
 
+      // when
       const { patches } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(patches).toEqual([
         {
           type: PatchType.PROPS,
@@ -272,7 +294,8 @@ describe("edgeCases", () => {
       expect(root.childNodes[2]).not.toBe(before[1]);
     });
 
-    it("형제 reorder는 move 대신 인덱스 기반 텍스트 업데이트로 처리한다", () => {
+    it("형제 reorder를 인덱스 기반 텍스트 업데이트로 처리한다", () => {
+      // given
       const { root } = makeDom(`
         <ul>
           <li>A</li>
@@ -289,8 +312,10 @@ describe("edgeCases", () => {
         elementNode("li", {}, [textNode("A")]),
       ]);
 
+      // when
       const { patches } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(patches).toEqual([
         {
           type: PatchType.TEXT,
@@ -311,6 +336,9 @@ describe("edgeCases", () => {
 
   describe("입력 오류 / 방어 처리", () => {
     it("잘못된 vnode 입력은 public API 전반에서 동일하게 TypeError를 던진다", () => {
+      // given
+
+      // when / then
       expect(() => vdomToDom({})).toThrowError(
         new TypeError("Invalid vnode."),
       );
@@ -323,8 +351,10 @@ describe("edgeCases", () => {
     });
 
     it("알 수 없는 patch type과 필수 필드 누락 patch는 TypeError를 던진다", () => {
+      // given
       const { root } = makeDom('<div id="root"><span>one</span></div>');
 
+      // when / then
       expect(() =>
         applyPatches(root, [{ type: "UNKNOWN_PATCH", path: [] }]),
       ).toThrowError(new TypeError("Invalid patch."));
@@ -337,8 +367,10 @@ describe("edgeCases", () => {
     });
 
     it("존재하지 않는 path와 이미 제거된 노드를 가리키는 path를 안전하게 무시한다", () => {
+      // given
       const first = makeDom('<div id="root"><span>one</span></div>');
 
+      // when
       expectNoThrowAndSameDom(first.root, [
         { type: PatchType.TEXT, path: [9, 9], value: "changed" },
         { type: PatchType.PROPS, path: [4], props: { title: "ignored" } },
@@ -347,6 +379,7 @@ describe("edgeCases", () => {
 
       const second = makeDom('<div id="root"><span>one</span></div>');
 
+      // then
       expect(() =>
         applyPatches(second.root, [
           { type: PatchType.REMOVE, path: [0] },
@@ -359,6 +392,7 @@ describe("edgeCases", () => {
 
   describe("속성 / 노드 타입 처리", () => {
     it("prop 삭제는 undefined 패치를 만들고 실제 DOM에서도 제거한다", () => {
+      // given
       const { root } = makeDom('<div id="root" title="before" data-kind="demo"></div>');
       const oldVdom = elementNode("div", {
         id: "root",
@@ -367,8 +401,10 @@ describe("edgeCases", () => {
       });
       const newVdom = elementNode("div", { id: "root" });
 
+      // when
       const { patches } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(patches).toHaveLength(1);
       expect(patches[0].type).toBe(PatchType.PROPS);
       expect(patches[0].path).toEqual([]);
@@ -379,10 +415,12 @@ describe("edgeCases", () => {
       expect(root.outerHTML).toBe('<div id="root"></div>');
     });
 
-    it("prop 타입 처리: boolean, null, undefined, 빈 문자열을 현재 구현대로 반영한다", () => {
+    it("boolean, null, undefined, 빈 문자열 prop을 현재 구현대로 반영한다", () => {
+      // given
       const inputDom = makeDom('<input checked value="hello" disabled>');
       const buttonDom = makeDom("<button></button>");
 
+      // when
       applyPatches(inputDom.root, [
         {
           type: PatchType.PROPS,
@@ -404,6 +442,7 @@ describe("edgeCases", () => {
         },
       ]);
 
+      // then
       expect(inputDom.root.checked).toBe(false);
       expect(inputDom.root.value).toBe("");
       expect(inputDom.root.disabled).toBe(false);
@@ -413,19 +452,24 @@ describe("edgeCases", () => {
       expect(buttonDom.root.getAttribute("hidden")).toBe("");
     });
 
-    it("className / class 입력은 내부적으로 className으로 canonicalize된다", () => {
+    it("className 과 class 입력은 내부적으로 className 으로 정규화된다", () => {
+      // given
       const { root } = makeDom('<div class="a"></div>');
       const oldVdom = domToVdom(root);
       const newVdom = elementNode("div", { className: "a" }, []);
+
+      // when
       const { patches } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(oldVdom).toEqual(elementNode("div", { className: "a" }, []));
       expect(patches).toEqual([]);
       expect(root.outerHTML).toBe('<div class="a"></div>');
       expect(domToVdom(root)).toEqual(elementNode("div", { className: "a" }, []));
     });
 
-    it("img, input, button, data-*, aria-*, style 조합을 생성하고 교체할 수 있다", () => {
+    it("다양한 엘리먼트와 속성 조합을 생성하고 교체할 수 있다", () => {
+      // given
       const { root } = makeDom("<div></div>");
       const oldVdom = elementNode("div", {}, []);
       const newVdom = elementNode("section", { "data-kind": "demo" }, [
@@ -446,8 +490,10 @@ describe("edgeCases", () => {
         }, [textNode("Save")]),
       ]);
 
+      // when
       const { nextRoot } = patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(nextRoot?.nodeName).toBe("SECTION");
       expect(nextRoot?.getAttribute("data-kind")).toBe("demo");
       expect(nextRoot?.querySelector("img")?.getAttribute("alt")).toBe("demo image");
@@ -460,6 +506,7 @@ describe("edgeCases", () => {
     });
 
     it("void element는 생성, 비교, patch 과정에서 자식 없이 처리된다", () => {
+      // given
       const { root } = makeDom('<div><img src="/before.png"></div>');
       const oldVdom = elementNode("div", {}, [
         elementNode("img", { src: "/before.png" }),
@@ -469,8 +516,10 @@ describe("edgeCases", () => {
         elementNode("br", {}),
       ]);
 
+      // when
       patchFrom(oldVdom, newVdom, root);
 
+      // then
       expect(root.outerHTML).toBe('<div><input><br></div>');
       expect(root.querySelector("input")?.value).toBe("typed");
       expect(root.querySelector("img")).toBeNull();
@@ -478,8 +527,10 @@ describe("edgeCases", () => {
     });
 
     it('빈 텍스트 경계값은 "", null, undefined 모두 빈 문자열 DOM으로 정규화한다', () => {
+      // given
       const states = ["", null, undefined];
 
+      // when / then
       for (const nextValue of states) {
         const { root } = makeDom("<div>x</div>");
         const oldVdom = elementNode("div", {}, [textNode("x")]);
