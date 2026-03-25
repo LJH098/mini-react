@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub PR Creator"
+  short_description: "Create Korean PR + close linked issue"
+  default_prompt: "Use $gh-create-pr to turn rough PR notes into a polished Korean pull request, assign it to me, and include a Closes #issue footer based on the current branch."
