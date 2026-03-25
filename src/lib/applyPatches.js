@@ -2,15 +2,80 @@
  * 담당: 이진혁
  */
 import { NodeType, PatchType } from "../constants.js";
+import { removeDomProp, setDomProp } from "./domProps.js";
+import { isPlainObject, normalizeProps, normalizeVnode } from "./vnodeUtils.js";
 
 export function applyPatches(rootDom, patches) {
+  const normalizedPatches = normalizePatches(patches);
   let currentRoot = rootDom;
 
-  for (const patch of orderPatches(patches)) {
+  for (const patch of orderPatches(normalizedPatches)) {
     currentRoot = applyPatch(currentRoot, patch);
   }
 
   return currentRoot;
+}
+
+function normalizePatches(patches) {
+  if (!Array.isArray(patches)) {
+    throw new TypeError("Invalid patches.");
+  }
+
+  return patches.map(normalizePatch);
+}
+
+function normalizePatch(patch) {
+  if (!isPlainObject(patch) || !isValidPath(patch.path)) {
+    throw new TypeError("Invalid patch.");
+  }
+
+  switch (patch.type) {
+    case PatchType.TEXT:
+      if (!Object.hasOwn(patch, "value")) {
+        throw new TypeError("Invalid patch.");
+      }
+
+      return {
+        type: PatchType.TEXT,
+        path: [...patch.path],
+        value: patch.value,
+      };
+    case PatchType.REPLACE:
+    case PatchType.ADD:
+      if (!Object.hasOwn(patch, "node")) {
+        throw new TypeError("Invalid patch.");
+      }
+
+      return {
+        type: patch.type,
+        path: [...patch.path],
+        node: normalizeVnode(patch.node),
+      };
+    case PatchType.PROPS:
+      if (!isPlainObject(patch.props)) {
+        throw new TypeError("Invalid patch.");
+      }
+
+      return {
+        type: PatchType.PROPS,
+        path: [...patch.path],
+        props: normalizeProps(patch.props),
+      };
+    case PatchType.REMOVE:
+      return {
+        type: PatchType.REMOVE,
+        path: [...patch.path],
+      };
+    default:
+      throw new TypeError("Invalid patch.");
+  }
+}
+
+function isValidPath(path) {
+  return (
+    Array.isArray(path) &&
+    path.every((segment) => Number.isInteger(segment) && segment >= 0)
+  );
 }
 
 function orderPatches(patches) {
@@ -103,11 +168,11 @@ function applyPropsPatch(rootDom, patch) {
 
   for (const [key, value] of Object.entries(patch.props ?? {})) {
     if (value === undefined) {
-      removeProp(target, key);
+      removeDomProp(target, key);
       continue;
     }
 
-    setProp(target, key, value);
+    setDomProp(target, key, value);
   }
 
   return rootDom;
@@ -161,7 +226,7 @@ function createDomFromVdom(vnode) {
   const element = document.createElement(vnode.type);
 
   for (const [key, value] of Object.entries(vnode.props ?? {})) {
-    setProp(element, key, value);
+    setDomProp(element, key, value);
   }
 
   for (const child of vnode.children ?? []) {
@@ -169,52 +234,4 @@ function createDomFromVdom(vnode) {
   }
 
   return element;
-}
-
-function setProp(element, key, value) {
-  const attributeName = key === "className" ? "class" : key;
-
-  if (key === "style" && value && typeof value === "object") {
-    Object.assign(element.style, value);
-    return;
-  }
-
-  if (value === false || value == null) {
-    removeProp(element, key);
-    return;
-  }
-
-  if (value === true) {
-    element.setAttribute(attributeName, "");
-    return;
-  }
-
-  if (
-    key in element &&
-    typeof value !== "object" &&
-    !attributeName.startsWith("data-") &&
-    !attributeName.startsWith("aria-")
-  ) {
-    element[key] = value;
-    return;
-  }
-
-  element.setAttribute(attributeName, String(value));
-}
-
-function removeProp(element, key) {
-  const attributeName = key === "className" ? "class" : key;
-
-  if (key === "className") {
-    element.className = "";
-  } else if (key === "value") {
-    element.value = "";
-  } else if (key === "checked") {
-    element.checked = false;
-  } else if (key === "style") {
-    element.removeAttribute("style");
-    return;
-  }
-
-  element.removeAttribute(attributeName);
 }

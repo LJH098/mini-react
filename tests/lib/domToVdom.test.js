@@ -32,6 +32,7 @@ describe("domToVdom", () => {
     const strong = document.createElement("strong");
 
     article.setAttribute("id", "intro");
+    article.setAttribute("class", "hero");
     article.setAttribute("data-count", "3");
     article.append("Hello ");
     strong.textContent = "world";
@@ -42,7 +43,7 @@ describe("domToVdom", () => {
 
     // then
     expect(actual).toEqual(
-      elementNode("article", { id: "intro", "data-count": "3" }, [
+      elementNode("article", { id: "intro", className: "hero", "data-count": "3" }, [
         textNode("Hello "),
         elementNode("strong", {}, [textNode("world")]),
       ]),

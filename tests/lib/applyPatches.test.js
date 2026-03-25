@@ -68,4 +68,18 @@ describe("applyPatches", () => {
     // then
     expect(rootDom.outerHTML).toBe("<div><span>first</span></div>");
   });
+
+  it("잘못된 patch 입력이면 일관된 TypeError를 던진다", () => {
+    const rootDom = document.createElement("div");
+
+    expect(() =>
+      applyPatches(rootDom, [{ type: "UNKNOWN_PATCH", path: [] }]),
+    ).toThrowError(new TypeError("Invalid patch."));
+    expect(() =>
+      applyPatches(rootDom, [{ type: "PROPS", path: [] }]),
+    ).toThrowError(new TypeError("Invalid patch."));
+    expect(() =>
+      applyPatches(rootDom, [{ type: "TEXT", path: ["nope"], value: "x" }]),
+    ).toThrowError(new TypeError("Invalid patch."));
+  });
 });

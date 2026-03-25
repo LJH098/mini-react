@@ -29,7 +29,12 @@ describe("vdomToDom", () => {
 
   it("속성과 텍스트 자식을 가진 엘리먼트 vnode를 DOM으로 변환한다", () => {
     // given
-    const vnode = elementNode("button", { id: "save", title: "Save", "data-count": 3 }, [
+    const vnode = elementNode("button", {
+      id: "save",
+      className: "primary",
+      title: "Save",
+      "data-count": 3,
+    }, [
       textNode("Save"),
     ]);
 
@@ -40,6 +45,7 @@ describe("vdomToDom", () => {
     expect(domNode.nodeType).toBe(Node.ELEMENT_NODE);
     expect(domNode.nodeName).toBe("BUTTON");
     expect(domNode.getAttribute("id")).toBe("save");
+    expect(domNode.getAttribute("class")).toBe("primary");
     expect(domNode.getAttribute("title")).toBe("Save");
     expect(domNode.getAttribute("data-count")).toBe("3");
     expect(domNode.textContent).toBe("Save");
@@ -59,5 +65,9 @@ describe("vdomToDom", () => {
     expect(domNode.querySelector("h1")?.textContent).toBe("Title");
     expect(domNode.querySelector("p")?.textContent).toBe("Body copy");
     expect(domNode.childNodes).toHaveLength(2);
+  });
+
+  it("잘못된 vnode 입력이면 일관된 TypeError를 던진다", () => {
+    expect(() => vdomToDom({})).toThrowError(new TypeError("Invalid vnode."));
   });
 });
