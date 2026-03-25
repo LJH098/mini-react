@@ -1,12 +1,15 @@
 import { elementNode, textNode } from "../constants.js";
+import { normalizeProps } from "./vnodeUtils.js";
 
 /**
  * DOM 엘리먼트의 어트리뷰트를 { 이름: 값 } 형태의 객체로 변환한다.
- * 예) <div class="box" id="app"> → { class: "box", id: "app" }
+ * 예) <div class="box" id="app"> → { className: "box", id: "app" }
  */
 function readProps(element) {
-  return Object.fromEntries(
-    Array.from(element.attributes, (attribute) => [attribute.name, attribute.value]),
+  return normalizeProps(
+    Object.fromEntries(
+      Array.from(element.attributes, (attribute) => [attribute.name, attribute.value]),
+    ),
   );
 }
 

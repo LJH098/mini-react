@@ -2,11 +2,20 @@
  * 담당: 이진혁
  */
 import { NodeType, PatchType } from "../constants.js";
+import { normalizeVnode } from "./vnodeUtils.js";
 
 export function diff(oldVdom, newVdom) {
   const patches = [];
-  walk(oldVdom, newVdom, [], patches);
+  walk(normalizeNullableVnode(oldVdom), normalizeNullableVnode(newVdom), [], patches);
   return patches;
+}
+
+function normalizeNullableVnode(vnode) {
+  if (vnode == null) {
+    return null;
+  }
+
+  return normalizeVnode(vnode);
 }
 
 function walk(oldNode, newNode, path, patches) {

@@ -77,4 +77,9 @@ describe("diff", () => {
       },
     ]);
   });
+
+  it("잘못된 vnode 입력이면 일관된 TypeError를 던진다", () => {
+    expect(() => diff({}, {})).toThrowError(new TypeError("Invalid vnode."));
+    expect(() => diff(null, {})).toThrowError(new TypeError("Invalid vnode."));
+  });
 });
