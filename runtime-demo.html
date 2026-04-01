@@ -1,190 +1,1541 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mini React Root Runtime Demo</title>
+    <title>Green Cafe Community Demo</title>
     <style>
       :root {
         color-scheme: light;
-        font-family: "SF Mono", "IBM Plex Mono", monospace;
-        background: #f5efe2;
-        color: #1f1a17;
+        font-family: "Pretendard", "SUIT", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        --green-700: #0f8f4f;
+        --green-600: #14a85c;
+        --green-500: #1dbf68;
+        --green-100: #eaf8ef;
+        --green-050: #f4fbf6;
+        --line: #e5ebe7;
+        --text: #1d2821;
+        --muted: #66756b;
+        --surface: rgba(255, 255, 255, 0.92);
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
-        padding: 32px;
+        min-height: 100vh;
+        color: var(--text);
+        line-height: 1.5;
         background:
-          radial-gradient(circle at top left, rgba(208, 119, 54, 0.18), transparent 32%),
-          linear-gradient(180deg, #fbf7ee 0%, #efe4d2 100%);
+          radial-gradient(circle at top left, rgba(29, 191, 104, 0.08), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(17, 120, 70, 0.06), transparent 32%),
+          linear-gradient(180deg, #f7faf8 0%, #eef3ef 100%);
       }
 
-      main {
-        max-width: 980px;
+      #app {
+        width: 100%;
+      }
+
+      .page-shell {
+        max-width: 1440px;
         margin: 0 auto;
+        padding: 24px 20px 48px;
         display: grid;
-        gap: 20px;
+        gap: 18px;
       }
 
-      .panel {
-        background: rgba(255, 252, 247, 0.88);
-        border: 1px solid rgba(54, 36, 22, 0.12);
+      .topbar,
+      .hero,
+      .sidebar-card,
+      .board-card,
+      .detail-card,
+      .preview-card,
+      .footer-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
         border-radius: 20px;
-        padding: 20px;
-        box-shadow: 0 18px 40px rgba(54, 36, 22, 0.08);
+        box-shadow: 0 10px 24px rgba(18, 35, 24, 0.05);
       }
 
-      .panel h1,
-      .panel h2,
-      .panel p {
-        margin: 0;
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 22px;
       }
 
-      .stack {
+      .brand-block {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 96px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--green-700), var(--green-500));
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-copy {
         display: grid;
+        gap: 4px;
+      }
+
+      .brand-copy strong {
+        font-size: 20px;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-copy span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+        word-break: keep-all;
+      }
+
+      .topbar-tools {
+        display: flex;
+        align-items: center;
         gap: 12px;
       }
 
-      .controls {
+      .search-shell {
+        width: min(420px, 48vw);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--line);
+      }
+
+      .search-shell input {
+        width: 100%;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: var(--text);
+        font: inherit;
+      }
+
+      .search-shell span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: var(--green-100);
+        color: var(--green-700);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .primary-button,
+      .ghost-button,
+      .soft-button,
+      .chip-button,
+      .like-button {
+        appearance: none;
+        border: 0;
+        cursor: pointer;
+        font: inherit;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      .primary-button:hover,
+      .ghost-button:hover,
+      .soft-button:hover,
+      .chip-button:hover,
+      .like-button:hover {
+        transform: translateY(-1px);
+      }
+
+      .primary-button {
+        padding: 11px 17px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--green-700), var(--green-500));
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 10px 18px rgba(20, 168, 92, 0.16);
+      }
+
+      .ghost-button {
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .soft-button {
+        padding: 10px 14px;
+        border-radius: 14px;
+        background: var(--green-100);
+        color: var(--green-700);
+        font-weight: 700;
+      }
+
+      .chip-button {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .chip-button.active {
+        background: var(--green-100);
+        border-color: rgba(20, 168, 92, 0.28);
+        color: var(--green-700);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+        gap: 18px;
+        padding: 24px;
+      }
+
+      .hero-copy,
+      .hero-preview {
+        display: grid;
+        gap: 16px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--green-100);
+        color: var(--green-700);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .hero-copy h1,
+      .board-header h2,
+      .detail-card h3,
+      .sidebar-card h3 {
+        margin: 0;
+      }
+
+      .hero-copy h1 {
+        font-size: clamp(28px, 3.6vw, 40px);
+        line-height: 1.24;
+        letter-spacing: -0.03em;
+      }
+
+      .hero-copy p,
+      .muted {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+        word-break: keep-all;
+      }
+
+      .hero-actions,
+      .hero-stats,
+      .toolbar-row,
+      .sort-row,
+      .action-row,
+      .detail-actions,
+      .detail-stats {
         display: flex;
         flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .stat-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 13px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid var(--line);
+      }
+
+      .stat-pill strong {
+        font-size: 15px;
+      }
+
+      .stat-pill span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .preview-list {
+        display: grid;
         gap: 12px;
       }
 
-      button {
-        font: inherit;
-        border: 0;
-        border-radius: 999px;
-        padding: 10px 16px;
-        background: #1f1a17;
-        color: #fff8f0;
-        cursor: pointer;
+      .preview-card {
+        padding: 15px 16px;
       }
 
-      ul {
+      .preview-card strong,
+      .post-row strong,
+      .detail-title {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .preview-meta,
+      .post-meta,
+      .detail-meta,
+      .composer-meta,
+      .footer-card p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+        word-break: keep-all;
+      }
+
+      .service-grid {
+        display: grid;
+        grid-template-columns: 250px minmax(0, 1fr) 360px;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .sidebar-stack,
+      .main-stack,
+      .detail-stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .sidebar-card,
+      .board-card,
+      .detail-card,
+      .footer-card {
+        padding: 20px;
+      }
+
+      .sidebar-card h3,
+      .board-header p,
+      .detail-card p {
         margin: 0;
-        padding-left: 20px;
       }
 
-      code {
-        background: rgba(31, 26, 23, 0.06);
-        padding: 2px 6px;
+      .sidebar-card h3 {
+        font-size: 18px;
+        line-height: 1.35;
+        letter-spacing: -0.02em;
+      }
+
+      .menu-list,
+      .post-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .menu-item span:first-child {
+        font-weight: 600;
+      }
+
+      .menu-item.active {
+        background: var(--green-050);
+        border-color: rgba(20, 168, 92, 0.24);
+      }
+
+      .menu-item span:last-child {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .board-card {
+        display: grid;
+        gap: 18px;
+      }
+
+      .board-header {
+        display: grid;
+        gap: 10px;
+      }
+
+      .board-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .board-title-row h2 {
+        font-size: 23px;
+        letter-spacing: -0.02em;
+      }
+
+      .board-toolbar {
+        display: grid;
+        gap: 12px;
+      }
+
+      .toolbar-row {
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .toolbar-row .muted strong {
+        color: var(--text);
+      }
+
+      .sort-row {
+        align-items: center;
+      }
+
+      .sort-row > span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .post-row {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        padding: 15px 16px;
+        cursor: pointer;
+        text-align: left;
+        display: grid;
+        gap: 9px;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+      }
+
+      .post-row:hover {
+        transform: translateY(-1px);
+        border-color: rgba(20, 168, 92, 0.28);
+        box-shadow: 0 14px 24px rgba(18, 35, 24, 0.05);
+      }
+
+      .post-row.selected {
+        border-color: rgba(20, 168, 92, 0.42);
+        box-shadow: 0 12px 24px rgba(20, 168, 92, 0.08);
+      }
+
+      .post-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .category-tag,
+      .like-tag,
+      .outline-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        padding: 6px 10px;
         border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .category-tag {
+        background: var(--green-100);
+        color: var(--green-700);
+      }
+
+      .like-tag {
+        background: #f5f7f6;
+        color: var(--muted);
+      }
+
+      .outline-tag {
+        border: 1px solid var(--line);
+        color: var(--muted);
+      }
+
+      .post-summary {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+        word-break: keep-all;
+      }
+
+      .post-meta,
+      .detail-meta,
+      .detail-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+      }
+
+      .detail-card {
+        display: grid;
+        gap: 18px;
+      }
+
+      .detail-title {
+        font-size: 25px;
+        line-height: 1.34;
+        letter-spacing: -0.02em;
+      }
+
+      .detail-body {
+        margin: 0;
+        color: #2c3730;
+        line-height: 1.76;
+        white-space: pre-wrap;
+        word-break: keep-all;
+      }
+
+      .detail-divider {
+        width: 100%;
+        height: 1px;
+        background: var(--line);
+      }
+
+      .detail-actions {
+        align-items: center;
+      }
+
+      .like-button {
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .like-button.active {
+        background: #eaf8ef;
+        border-color: rgba(20, 168, 92, 0.28);
+        color: var(--green-700);
+      }
+
+      .like-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+      }
+
+      .empty-state {
+        padding: 28px 18px;
+        border-radius: 16px;
+        border: 1px dashed #c9d8ce;
+        background: #f9fcfa;
+        display: grid;
+        gap: 10px;
+        text-align: center;
+      }
+
+      .empty-state h3,
+      .empty-state p {
+        margin: 0;
+      }
+
+      .composer-card {
+        display: grid;
+        gap: 14px;
+      }
+
+      .composer-label {
+        display: grid;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .composer-input,
+      .composer-textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        padding: 14px 16px;
+        color: var(--text);
+        font: inherit;
+        outline: none;
+      }
+
+      .composer-textarea {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.65;
+      }
+
+      .composer-input:focus,
+      .composer-textarea:focus,
+      .search-shell:focus-within {
+        border-color: rgba(20, 168, 92, 0.34);
+        box-shadow: 0 0 0 4px rgba(29, 191, 104, 0.09);
+      }
+
+      .footer-card {
+        display: grid;
+        gap: 8px;
+      }
+
+      .footer-card strong {
+        font-size: 15px;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      @media (max-width: 1180px) {
+        .service-grid {
+          grid-template-columns: 220px minmax(0, 1fr);
+        }
+
+        .detail-stack {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero,
+        .service-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .topbar-tools {
+          width: 100%;
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .search-shell {
+          width: 100%;
+        }
+
+        .board-title-row,
+        .toolbar-row {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .sidebar-stack {
+          gap: 14px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          padding: 14px 12px 30px;
+          gap: 14px;
+        }
+
+        .topbar,
+        .hero,
+        .sidebar-card,
+        .board-card,
+        .detail-card,
+        .footer-card {
+          border-radius: 18px;
+        }
+
+        .topbar {
+          padding: 16px;
+        }
+
+        .hero,
+        .sidebar-card,
+        .board-card,
+        .detail-card,
+        .footer-card {
+          padding: 16px;
+        }
+
+        .brand-block {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .brand-copy strong {
+          font-size: 18px;
+        }
+
+        .hero-copy h1 {
+          font-size: 27px;
+        }
+
+        .board-title-row h2,
+        .detail-title {
+          font-size: 22px;
+        }
+
+        .sidebar-card h3 {
+          font-size: 17px;
+        }
+
+        .sidebar-card p,
+        .footer-card p {
+          font-size: 13px;
+        }
+
+        .menu-list {
+          gap: 8px;
+        }
+
+        .menu-item {
+          padding: 10px 12px;
+        }
+
+        .menu-item span:first-child {
+          font-size: 15px;
+        }
+
+        .menu-item span:last-child {
+          font-size: 12px;
+        }
+
+        .primary-button,
+        .ghost-button,
+        .soft-button,
+        .like-button {
+          width: 100%;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .detail-actions,
+        .action-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <section class="panel stack">
-        <h1>Root-Only Runtime Demo</h1>
-        <p>
-          The root uses <code>FunctionComponent</code>. Child rows are plain functions that return VDOM from props.
-        </p>
-        <div id="app"></div>
-      </section>
-
-      <section class="panel stack">
-        <h2>Effect Log</h2>
-        <ul id="effect-log"></ul>
-      </section>
-
-      <section class="panel stack">
-        <h2>Keyed List Identity</h2>
-        <p id="identity-log"></p>
-      </section>
-    </main>
+    <div id="app"></div>
 
     <script type="module">
       import {
         FunctionComponent,
-        mountRoot,
+        elementNode as h,
+        textNode as t,
         useEffect,
         useMemo,
         useState,
-        elementNode,
-        textNode,
       } from "/src/lib.js";
 
-      const effectLog = document.getElementById("effect-log");
-      const identityLog = document.getElementById("identity-log");
-      const domIdentityByNode = new WeakMap();
-      let nextDomIdentity = 1;
+      const STORAGE_KEY = "mini-react.community-demo.v2";
+      const CURRENT_USER = "김민지";
+      const COMMUNITY_NAME = "Green Cafe";
+      const CATEGORY_ORDER = ["공지", "자유", "질문", "정보", "후기"];
+      const SORT_OPTIONS = [
+        { id: "latest", label: "최신순" },
+        { id: "popular", label: "인기순" },
+        { id: "comments", label: "댓글순" },
+      ];
 
-      function CounterRow(props) {
-        return elementNode("p", {}, [
-          textNode(`${props.label}: ${props.value}`),
-        ]);
+      function compact(children) {
+        return children.filter((child) => child !== null && child !== undefined);
       }
 
-      function readListIdentity() {
-        const items = Array.from(document.querySelectorAll('[data-demo-list="items"] > li'));
-        const summary = items.map((item) => {
-          if (!domIdentityByNode.has(item)) {
-            domIdentityByNode.set(item, nextDomIdentity);
-            nextDomIdentity += 1;
+      function formatCount(value) {
+        return new Intl.NumberFormat("ko-KR").format(value);
+      }
+
+      function formatDateLabel(value) {
+        return new Intl.DateTimeFormat("ko-KR", {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date(value));
+      }
+
+      function formatTimeLabel(value) {
+        return new Intl.DateTimeFormat("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(value);
+      }
+
+      function createDefaultPosts() {
+        return [
+          {
+            id: "post-101",
+            category: "공지",
+            title: "이번 주 스터디는 mini-react 데모 점검 위주로 진행해요",
+            body:
+              "백엔드 없이도 프론트 화면 전환과 상태 흐름을 설득력 있게 보여주는 것이 목표예요.\n로그인 상태에 따라 글쓰기, 수정, 좋아요가 어떻게 달라지는지 꼭 확인해주세요.",
+            author: CURRENT_USER,
+            createdAt: "2026-03-30T09:10:00+09:00",
+            views: 148,
+            likes: 42,
+            liked: true,
+            comments: 11,
+          },
+          {
+            id: "post-102",
+            category: "자유",
+            title: "네이버 카페 느낌으로 만든 게시판 UI 레퍼런스 공유",
+            body:
+              "상단 브랜드 바, 좌측 메뉴, 리스트 밀도, 우측 상세 카드 구성이 꽤 안정적으로 보여요.\n색은 과하지 않게 그린 포인트만 쓰고 배경은 밝게 두는 쪽이 가장 자연스럽더라고요.",
+            author: CURRENT_USER,
+            createdAt: "2026-03-31T13:24:00+09:00",
+            views: 96,
+            likes: 17,
+            liked: false,
+            comments: 4,
+          },
+          {
+            id: "post-103",
+            category: "질문",
+            title: "좋아요 누르면 인기순 정렬이 바뀌는 것도 보여주면 좋을까요?",
+            body:
+              "단순 숫자 증가보다, 좋아요 클릭이 리스트 순서에 영향을 주면 keyed diff를 훨씬 자연스럽게 설명할 수 있을 것 같아요.\n그래서 인기순 정렬에서 DOM 재배치가 보이도록 설계해두면 좋습니다.",
+            author: CURRENT_USER,
+            createdAt: "2026-04-01T08:42:00+09:00",
+            views: 63,
+            likes: 25,
+            liked: false,
+            comments: 8,
+          },
+          {
+            id: "post-104",
+            category: "정보",
+            title: "mock 데이터만으로도 로그인 / 글쓰기 / 수정 흐름 충분히 보여줄 수 있어요",
+            body:
+              "사용자는 한 명이라고 가정하고, 작성한 글은 모두 내 글로 다루면 됩니다.\n이 방식이면 권한 UI를 프론트 상태만으로도 쉽게 시연할 수 있어요.",
+            author: CURRENT_USER,
+            createdAt: "2026-03-29T18:20:00+09:00",
+            views: 127,
+            likes: 31,
+            liked: true,
+            comments: 6,
+          },
+          {
+            id: "post-105",
+            category: "후기",
+            title: "직접 만들어보니 useMemo랑 useEffect를 서비스 화면에 녹이는 게 훨씬 좋네요",
+            body:
+              "기능 데모 패널보다 실제 서비스 화면에서 검색, 정렬, 자동 저장, 상세 패널을 구성하니까 코드도 설명하기 쉬워졌어요.\n과제 발표 때도 사용자 관점으로 흐름을 보여줄 수 있습니다.",
+            author: CURRENT_USER,
+            createdAt: "2026-03-28T22:05:00+09:00",
+            views: 84,
+            likes: 14,
+            liked: false,
+            comments: 3,
+          },
+        ];
+      }
+
+      function sanitizePosts(posts) {
+        if (!Array.isArray(posts)) {
+          return createDefaultPosts();
+        }
+
+        const safePosts = posts.filter((post) => (
+          typeof post?.id === "string" &&
+          typeof post?.title === "string" &&
+          typeof post?.body === "string"
+        ));
+
+        return safePosts.length > 0 ? safePosts : createDefaultPosts();
+      }
+
+      function loadPersistedState() {
+        try {
+          const rawValue = localStorage.getItem(STORAGE_KEY);
+
+          if (!rawValue) {
+            return {
+              isLoggedIn: false,
+              posts: createDefaultPosts(),
+            };
           }
 
-          return `${item.getAttribute("data-item-id")} -> dom#${domIdentityByNode.get(item)}`;
-        });
-
-        identityLog.textContent = summary.join(" | ");
+          const parsed = JSON.parse(rawValue);
+          return {
+            isLoggedIn: Boolean(parsed?.isLoggedIn),
+            posts: sanitizePosts(parsed?.posts),
+          };
+        } catch {
+          return {
+            isLoggedIn: false,
+            posts: createDefaultPosts(),
+          };
+        }
       }
 
-      const Root = new FunctionComponent(() => {
-        const [count, setCount] = useState(0);
-        const [items, setItems] = useState([
-          { id: "a", label: "Alpha" },
-          { id: "b", label: "Beta" },
-          { id: "c", label: "Gamma" },
-        ]);
+      function sortPosts(posts, sortMode) {
+        const nextPosts = [...posts];
 
-        const doubled = useMemo(() => count * 2, [count]);
+        nextPosts.sort((left, right) => {
+          if (sortMode === "popular") {
+            return (
+              right.likes - left.likes ||
+              new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+            );
+          }
+
+          if (sortMode === "comments") {
+            return (
+              right.comments - left.comments ||
+              new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+            );
+          }
+
+          return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+        });
+
+        return nextPosts;
+      }
+
+      function TopBar(props) {
+        return h("header", { className: "topbar" }, [
+          h("div", { className: "brand-block" }, [
+            h("span", { className: "brand-badge" }, [t(COMMUNITY_NAME)]),
+            h("div", { className: "brand-copy" }, [
+              h("strong", {}, [t("우리 동네 프론트엔드 카페")]),
+              h("span", {}, [t("로그인, 글쓰기, 수정, 좋아요를 mini-react 상태만으로 보여줍니다.")]),
+            ]),
+          ]),
+          h("div", { className: "topbar-tools" }, compact([
+            h("label", { className: "search-shell" }, [
+              h("span", {}, [t("검색")]),
+              h("input", {
+                type: "text",
+                value: props.searchQuery,
+                placeholder: "제목이나 내용으로 검색해보세요",
+                oninput: (event) => props.onSearchChange(event.target.value),
+              }, []),
+            ]),
+            props.isLoggedIn
+              ? h("div", { className: "user-chip" }, [t(`${CURRENT_USER} · 로그인 중`)])
+              : null,
+            h("button", {
+              type: "button",
+              className: props.isLoggedIn ? "ghost-button" : "primary-button",
+              onclick: props.onToggleLogin,
+            }, [t(props.isLoggedIn ? "로그아웃" : "로그인 체험")]),
+          ])),
+        ]);
+      }
+
+      function StatPill(props) {
+        return h("div", { className: "stat-pill" }, [
+          h("strong", {}, [t(props.value)]),
+          h("span", {}, [t(props.label)]),
+        ]);
+      }
+
+      function LoginHero(props) {
+        return h("section", { className: "hero" }, [
+          h("div", { className: "hero-copy" }, [
+            h("span", { className: "eyebrow" }, [t("community preview")]),
+            h("h1", {}, [t("로그인하면 글쓰기와 좋아요까지 가능한 게시판 데모가 열립니다.")]),
+            h("p", {}, [
+              t("백엔드 없이도 로그인 상태, 게시글 권한, 좋아요, 정렬, 검색 흐름을 실제 서비스처럼 시연합니다."),
+            ]),
+            h("div", { className: "hero-actions" }, [
+              h("button", {
+                type: "button",
+                className: "primary-button",
+                onclick: props.onLogin,
+              }, [t("로그인하고 둘러보기")]),
+            ]),
+            h("div", { className: "hero-stats" }, [
+              StatPill({ value: formatCount(props.summary.totalPosts), label: "전체 게시글" }),
+              StatPill({ value: formatCount(props.summary.totalLikes), label: "누적 좋아요" }),
+              StatPill({ value: formatCount(props.summary.totalComments), label: "누적 댓글" }),
+            ]),
+          ]),
+          h("div", { className: "hero-preview" }, [
+            h("div", { className: "board-header" }, [
+              h("h2", {}, [t("지금 인기 있는 글")]),
+              h("p", { className: "muted" }, [t("검색어가 있으면 미리보기 목록도 함께 필터링됩니다.")]),
+            ]),
+            props.featuredPosts.length > 0
+              ? h("div", { className: "preview-list" }, props.featuredPosts.map((post) => (
+                h("article", { className: "preview-card" }, [
+                  h("span", { className: "category-tag" }, [t(post.category)]),
+                  h("strong", {}, [t(post.title)]),
+                  h("p", { className: "preview-meta" }, [t(`${formatDateLabel(post.createdAt)} · 좋아요 ${formatCount(post.likes)} · 댓글 ${formatCount(post.comments)}`)]),
+                ])
+              )))
+              : h("article", { className: "preview-card" }, [
+                h("strong", {}, [t("검색 결과가 없어요")]),
+                h("p", { className: "preview-meta" }, [t("다른 검색어로 바꾸거나 로그인 후 전체 게시판을 둘러보세요.")]),
+              ]),
+          ]),
+        ]);
+      }
+
+      function SidebarMenu(props) {
+        return h("div", { className: "sidebar-stack" }, [
+          h("section", { className: "sidebar-card" }, [
+            h("h3", {}, [t("카테고리")]),
+            h("p", { className: "muted" }, [t("필터를 바꾸면 목록이 바로 갱신됩니다.")]),
+            h("div", { className: "menu-list" }, props.categories.map((category) => (
+              h("button", {
+                type: "button",
+                className: `menu-item${category === props.selectedCategory ? " active" : ""}`,
+                onclick: () => props.onSelectCategory(category),
+              }, [
+                h("span", {}, [t(category)]),
+                h("span", {}, [t(formatCount(props.counts[category] ?? 0))]),
+              ])
+            ))),
+          ]),
+          h("section", { className: "sidebar-card" }, [
+            h("h3", {}, [t("빠른 액션")]),
+            h("p", { className: "muted" }, [t(props.isLoggedIn ? "새 글 작성과 글 수정이 가능합니다." : "로그인하면 글쓰기와 좋아요를 사용할 수 있습니다.")]),
+            props.isLoggedIn
+              ? h("button", {
+                type: "button",
+                className: "primary-button",
+                onclick: props.onOpenCreate,
+              }, [t("글쓰기")])
+              : h("button", {
+                type: "button",
+                className: "ghost-button",
+                onclick: props.onToggleLogin,
+              }, [t("로그인해서 글쓰기 열기")]),
+          ]),
+          h("section", { className: "footer-card" }, [
+            h("strong", {}, [t("자동 저장 상태")]),
+            h("p", {}, [t(props.saveNotice)]),
+          ]),
+        ]);
+      }
+
+      function BoardToolbar(props) {
+        return h("div", { className: "board-toolbar" }, [
+          h("div", { className: "toolbar-row" }, [
+            h("div", { className: "muted" }, [
+              t("현재 "),
+              h("strong", {}, [t(props.selectedCategory)]),
+              t(" 카테고리에서 "),
+              h("strong", {}, [t(formatCount(props.totalCount))]),
+              t("개의 글을 보고 있습니다."),
+            ]),
+            props.isLoggedIn
+              ? h("button", {
+                type: "button",
+                className: "soft-button",
+                onclick: props.onOpenCreate,
+              }, [t("새 글 작성")])
+              : h("span", { className: "outline-tag" }, [t("로그인 후 글쓰기 가능")]),
+          ]),
+          h("div", { className: "sort-row" }, [
+            h("span", {}, [t("정렬")]),
+            ...props.sortOptions.map((option) => (
+              h("button", {
+                type: "button",
+                className: `chip-button${option.id === props.sortMode ? " active" : ""}`,
+                onclick: () => props.onSortChange(option.id),
+              }, [t(option.label)])
+            )),
+          ]),
+        ]);
+      }
+
+      function PostRow(props) {
+        return h("button", {
+          type: "button",
+          className: `post-row${props.isSelected ? " selected" : ""}`,
+          onclick: props.onSelect,
+        }, [
+          h("div", { className: "post-header" }, [
+            h("span", { className: "category-tag" }, [t(props.post.category)]),
+            h("span", { className: "like-tag" }, [t(`좋아요 ${formatCount(props.post.likes)}`)]),
+          ]),
+          h("strong", {}, [t(props.post.title)]),
+          h("p", { className: "post-summary" }, [t(props.post.body.slice(0, 82))]),
+          h("div", { className: "post-meta" }, [
+            h("span", {}, [t(props.post.author)]),
+            h("span", {}, [t(formatDateLabel(props.post.createdAt))]),
+            h("span", {}, [t(`조회 ${formatCount(props.post.views)}`)]),
+            h("span", {}, [t(`댓글 ${formatCount(props.post.comments)}`)]),
+            props.post.liked ? h("span", { className: "outline-tag" }, [t("내가 좋아요함")]) : null,
+          ].filter(Boolean)),
+        ]);
+      }
+
+      function PostList(props) {
+        if (props.posts.length === 0) {
+          return EmptyState({
+            title: "조건에 맞는 게시글이 없어요",
+            description: "검색어를 지우거나 다른 카테고리를 선택해보세요.",
+          });
+        }
+
+        return h("div", { className: "post-list" }, props.posts.map((post) => (
+          PostRow({
+            post,
+            isSelected: post.id === props.selectedPostId,
+            onSelect: () => props.onSelectPost(post.id),
+          })
+        )));
+      }
+
+      function LikeButton(props) {
+        return h("button", {
+          type: "button",
+          className: `like-button${props.liked ? " active" : ""}`,
+          disabled: !props.isLoggedIn,
+          onclick: props.onToggleLike,
+          title: props.isLoggedIn ? "좋아요 토글" : "로그인 후 사용할 수 있습니다",
+        }, [
+          t(props.liked ? `좋아요 취소 · ${formatCount(props.likes)}` : `좋아요 · ${formatCount(props.likes)}`),
+        ]);
+      }
+
+      function PostDetail(props) {
+        if (!props.post) {
+          return EmptyState({
+            title: "선택된 글이 없어요",
+            description: "왼쪽 목록에서 게시글을 선택하면 상세 내용을 볼 수 있습니다.",
+          });
+        }
+
+        return h("section", { className: "detail-card" }, [
+          h("div", { className: "board-header" }, [
+            h("span", { className: "category-tag" }, [t(props.post.category)]),
+            h("h3", { className: "detail-title" }, [t(props.post.title)]),
+            h("div", { className: "detail-meta" }, [
+              h("span", {}, [t(props.post.author)]),
+              h("span", {}, [t(formatDateLabel(props.post.createdAt))]),
+              h("span", {}, [t(`조회 ${formatCount(props.post.views)}`)]),
+            ]),
+          ]),
+          h("p", { className: "detail-body" }, [t(props.post.body)]),
+          h("div", { className: "detail-divider" }, []),
+          h("div", { className: "detail-stats" }, [
+            h("span", { className: "outline-tag" }, [t(`좋아요 ${formatCount(props.post.likes)}`)]),
+            h("span", { className: "outline-tag" }, [t(`댓글 ${formatCount(props.post.comments)}`)]),
+            props.post.liked ? h("span", { className: "outline-tag" }, [t("현재 사용자가 좋아요를 눌렀습니다")]) : null,
+          ].filter(Boolean)),
+          h("div", { className: "detail-actions" }, compact([
+            LikeButton({
+              liked: props.post.liked,
+              likes: props.post.likes,
+              isLoggedIn: props.isLoggedIn,
+              onToggleLike: () => props.onToggleLike(props.post.id),
+            }),
+            props.isLoggedIn
+              ? h("button", {
+                type: "button",
+                className: "ghost-button",
+                onclick: () => props.onOpenEdit(props.post.id),
+              }, [t("글 수정")])
+              : h("span", { className: "outline-tag" }, [t("로그인 후 수정 가능")]),
+          ])),
+        ]);
+      }
+
+      function ComposerPanel(props) {
+        return h("section", { className: "detail-card composer-card" }, [
+          h("div", { className: "board-header" }, [
+            h("span", { className: "category-tag" }, [t(props.mode === "edit" ? "글 수정" : "새 글 작성")]),
+            h("h3", {}, [t(props.mode === "edit" ? "게시글을 수정하고 저장하세요" : "새 게시글을 작성해보세요")]),
+            h("p", { className: "composer-meta" }, [t(`카테고리: ${props.categoryLabel} · 작성자: ${CURRENT_USER}`)]),
+          ]),
+          h("label", { className: "composer-label" }, [
+            t("제목"),
+            h("input", {
+              type: "text",
+              className: "composer-input",
+              value: props.title,
+              placeholder: "게시글 제목을 입력하세요",
+              oninput: (event) => props.onTitleChange(event.target.value),
+            }, []),
+          ]),
+          h("label", { className: "composer-label" }, [
+            t("본문"),
+            h("textarea", {
+              className: "composer-textarea",
+              value: props.body,
+              placeholder: "내용을 입력하세요",
+              oninput: (event) => props.onBodyChange(event.target.value),
+            }, []),
+          ]),
+          h("div", { className: "action-row" }, [
+            h("button", {
+              type: "button",
+              className: "primary-button",
+              onclick: props.onSave,
+            }, [t(props.mode === "edit" ? "수정 저장" : "게시글 발행")]),
+            h("button", {
+              type: "button",
+              className: "ghost-button",
+              onclick: props.onCancel,
+            }, [t("닫기")]),
+          ]),
+        ]);
+      }
+
+      function EmptyState(props) {
+        return h("section", { className: "detail-card empty-state" }, compact([
+          h("h3", {}, [t(props.title)]),
+          h("p", { className: "muted" }, [t(props.description)]),
+          props.actionLabel
+            ? h("button", {
+              type: "button",
+              className: "ghost-button",
+              onclick: props.onAction,
+            }, [t(props.actionLabel)])
+            : null,
+        ]));
+      }
+
+      const persistedState = loadPersistedState();
+
+      const Root = new FunctionComponent((props, { renderChild }) => {
+        const [isLoggedIn, setIsLoggedIn] = useState(() => persistedState.isLoggedIn);
+        const [posts, setPosts] = useState(() => persistedState.posts);
+        const [selectedCategory, setSelectedCategory] = useState("전체");
+        const [searchQuery, setSearchQuery] = useState("");
+        const [sortMode, setSortMode] = useState("latest");
+        const [selectedPostId, setSelectedPostId] = useState(() => persistedState.posts[0]?.id ?? null);
+        const [composerMode, setComposerMode] = useState("closed");
+        const [draftTitle, setDraftTitle] = useState("");
+        const [draftBody, setDraftBody] = useState("");
+        const [saveNotice, setSaveNotice] = useState("브라우저에 자동 저장됩니다.");
+
+        const categories = useMemo(() => ["전체", ...CATEGORY_ORDER], []);
+
+        const categoryCounts = useMemo(() => {
+          const counts = { 전체: posts.length };
+
+          for (const category of CATEGORY_ORDER) {
+            counts[category] = posts.filter((post) => post.category === category).length;
+          }
+
+          return counts;
+        }, [posts]);
+
+        const visiblePosts = useMemo(() => {
+          const normalizedQuery = searchQuery.trim().toLowerCase();
+          const filteredPosts = posts.filter((post) => {
+            const matchesCategory = selectedCategory === "전체" || post.category === selectedCategory;
+            const matchesSearch =
+              normalizedQuery.length === 0 ||
+              post.title.toLowerCase().includes(normalizedQuery) ||
+              post.body.toLowerCase().includes(normalizedQuery);
+
+            return matchesCategory && matchesSearch;
+          });
+
+          return sortPosts(filteredPosts, sortMode);
+        }, [posts, selectedCategory, searchQuery, sortMode]);
+
+        const selectedPost = useMemo(() => (
+          posts.find((post) => post.id === selectedPostId) ?? null
+        ), [posts, selectedPostId]);
+
+        const featuredPosts = useMemo(() => {
+          const sourcePosts = searchQuery.trim().length > 0 ? visiblePosts : posts;
+          return sortPosts(sourcePosts, "popular").slice(0, 3);
+        }, [posts, visiblePosts, searchQuery]);
+
+        const summary = useMemo(() => ({
+          totalPosts: posts.length,
+          totalLikes: posts.reduce((sum, post) => sum + post.likes, 0),
+          totalComments: posts.reduce((sum, post) => sum + post.comments, 0),
+        }), [posts]);
 
         useEffect(() => {
-          const entry = document.createElement("li");
-          entry.textContent = `effect after commit: count=${count}, order=${items.map((item) => item.id).join(",")}`;
-          effectLog.prepend(entry);
-          readListIdentity();
-        }, [count, items]);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ isLoggedIn, posts }));
+          } catch {
+            // Ignore storage errors in the browser demo and keep the UI usable.
+          }
 
-        return elementNode("section", { className: "stack" }, [
-          elementNode("div", { className: "stack" }, [
-            CounterRow({ label: "Root count", value: String(count) }),
-            CounterRow({ label: "Memo doubled", value: String(doubled) }),
-            CounterRow({
-              label: "Child component",
-              value: "This row is rendered by a plain function.",
-            }),
+          setSaveNotice(`자동 저장됨 · ${formatTimeLabel(new Date())}`);
+        }, [isLoggedIn, posts]);
+
+        useEffect(() => {
+          if (composerMode !== "closed") {
+            return;
+          }
+
+          if (visiblePosts.length === 0) {
+            if (selectedPostId !== null) {
+              setSelectedPostId(null);
+            }
+            return;
+          }
+
+          if (!visiblePosts.some((post) => post.id === selectedPostId)) {
+            setSelectedPostId(visiblePosts[0].id);
+          }
+        }, [visiblePosts, selectedPostId, composerMode]);
+
+        useEffect(() => {
+          const screenTitle = composerMode === "create"
+            ? "새 글 작성"
+            : composerMode === "edit"
+              ? "게시글 수정"
+              : selectedPost?.title ?? props.communityName;
+
+          document.title = `${screenTitle} · ${props.communityName}`;
+
+          return () => {
+            document.title = `${props.communityName} Demo`;
+          };
+        }, [composerMode, selectedPost, props.communityName]);
+
+        function toggleLogin() {
+          setIsLoggedIn((currentValue) => !currentValue);
+          setComposerMode("closed");
+          setDraftTitle("");
+          setDraftBody("");
+        }
+
+        function selectPost(postId) {
+          setSelectedPostId(postId);
+          setComposerMode("closed");
+        }
+
+        function toggleLike(postId) {
+          if (!isLoggedIn) {
+            setSaveNotice("로그인 후 좋아요를 누를 수 있습니다.");
+            return;
+          }
+
+          setPosts((currentPosts) => currentPosts.map((post) => {
+            if (post.id !== postId) {
+              return post;
+            }
+
+            const nextLiked = !post.liked;
+
+            return {
+              ...post,
+              liked: nextLiked,
+              likes: post.likes + (nextLiked ? 1 : -1),
+            };
+          }));
+        }
+
+        function openCreate() {
+          if (!isLoggedIn) {
+            setSaveNotice("로그인하면 새 글을 작성할 수 있습니다.");
+            return;
+          }
+
+          setComposerMode("create");
+          setDraftTitle("");
+          setDraftBody("");
+        }
+
+        function openEdit(postId) {
+          if (!isLoggedIn) {
+            return;
+          }
+
+          const post = posts.find((entry) => entry.id === postId);
+
+          if (!post) {
+            return;
+          }
+
+          setSelectedPostId(postId);
+          setDraftTitle(post.title);
+          setDraftBody(post.body);
+          setComposerMode("edit");
+        }
+
+        function closeComposer() {
+          setComposerMode("closed");
+          setDraftTitle("");
+          setDraftBody("");
+        }
+
+        function saveDraft() {
+          const normalizedTitle = draftTitle.trim();
+          const normalizedBody = draftBody.trim();
+
+          if (!normalizedTitle || !normalizedBody) {
+            setSaveNotice("제목과 본문을 모두 입력해주세요.");
+            return;
+          }
+
+          if (composerMode === "edit" && selectedPostId) {
+            setPosts((currentPosts) => currentPosts.map((post) => (
+              post.id === selectedPostId
+                ? {
+                  ...post,
+                  title: normalizedTitle,
+                  body: normalizedBody,
+                }
+                : post
+            )));
+            setSaveNotice("게시글을 수정했습니다.");
+            setComposerMode("closed");
+            return;
+          }
+
+          const nextPostId = `post-${Date.now()}`;
+          const nextCategory = selectedCategory === "전체" ? "자유" : selectedCategory;
+
+          const nextPost = {
+            id: nextPostId,
+            category: nextCategory,
+            title: normalizedTitle,
+            body: normalizedBody,
+            author: CURRENT_USER,
+            createdAt: new Date().toISOString(),
+            views: 0,
+            likes: 0,
+            liked: false,
+            comments: 0,
+          };
+
+          setPosts((currentPosts) => [nextPost, ...currentPosts]);
+          setSelectedPostId(nextPostId);
+          setComposerMode("closed");
+          setDraftTitle("");
+          setDraftBody("");
+          setSaveNotice("새 게시글이 추가되었습니다.");
+        }
+
+        const currentCategoryLabel = composerMode === "edit"
+          ? selectedPost?.category ?? "자유"
+          : selectedCategory === "전체"
+            ? "자유"
+            : selectedCategory;
+
+        return h("div", { className: "page-shell" }, compact([
+          renderChild(TopBar, {
+            isLoggedIn,
+            searchQuery,
+            onSearchChange: setSearchQuery,
+            onToggleLogin: toggleLogin,
+          }),
+          !isLoggedIn
+            ? renderChild(LoginHero, {
+              featuredPosts,
+              summary,
+              onLogin: toggleLogin,
+            })
+            : h("div", { className: "service-grid" }, [
+              h("aside", { className: "sidebar-stack" }, [
+                renderChild(SidebarMenu, {
+                  categories,
+                  counts: categoryCounts,
+                  selectedCategory,
+                  onSelectCategory: setSelectedCategory,
+                  onOpenCreate: openCreate,
+                  isLoggedIn,
+                  onToggleLogin: toggleLogin,
+                  saveNotice,
+                }),
+              ]),
+              h("section", { className: "main-stack" }, [
+                h("section", { className: "board-card" }, [
+                  h("div", { className: "board-header" }, [
+                    h("div", { className: "board-title-row" }, [
+                      h("h2", {}, [t("우리 동네 프론트엔드 게시판")]),
+                      h("span", { className: "outline-tag" }, [t(`${props.communityName} demo`) ]),
+                    ]),
+                    h("p", { className: "muted" }, [t("검색, 정렬, 좋아요, 글쓰기, 수정을 하나의 루트 상태로 관리합니다.")]),
+                  ]),
+                  renderChild(BoardToolbar, {
+                    selectedCategory,
+                    totalCount: visiblePosts.length,
+                    isLoggedIn,
+                    sortMode,
+                    sortOptions: SORT_OPTIONS,
+                    onSortChange: setSortMode,
+                    onOpenCreate: openCreate,
+                  }),
+                  renderChild(PostList, {
+                    posts: visiblePosts,
+                    selectedPostId,
+                    onSelectPost: selectPost,
+                  }),
+                ]),
+              ]),
+              h("aside", { className: "detail-stack" }, [
+                composerMode === "closed"
+                  ? renderChild(PostDetail, {
+                    post: selectedPost,
+                    isLoggedIn,
+                    onToggleLike: toggleLike,
+                    onOpenEdit: openEdit,
+                  })
+                  : renderChild(ComposerPanel, {
+                    mode: composerMode,
+                    title: draftTitle,
+                    body: draftBody,
+                    categoryLabel: currentCategoryLabel,
+                    onTitleChange: setDraftTitle,
+                    onBodyChange: setDraftBody,
+                    onSave: saveDraft,
+                    onCancel: closeComposer,
+                  }),
+              ]),
+            ]),
+          h("section", { className: "footer-card" }, [
+            h("strong", {}, [t("Week 5 체크 포인트")]),
+            h("p", {}, [t("로그인 상태에 따라 화면이 바뀌고, 인기순에서 좋아요를 누르면 게시글 순서가 자연스럽게 다시 정렬됩니다.")]),
           ]),
-          elementNode("div", { className: "controls" }, [
-            elementNode("button", {
-              onclick: () => setCount((value) => value + 1),
-              type: "button",
-            }, [textNode("Increment count")]),
-            elementNode("button", {
-              onclick: () => {
-                setItems((currentItems) => [
-                  currentItems[2],
-                  currentItems[0],
-                  currentItems[1],
-                ]);
-              },
-              type: "button",
-            }, [textNode("Rotate keyed list")]),
-          ]),
-          elementNode("ul", {
-            "data-demo-list": "items",
-          }, items.map((item) => (
-            elementNode("li", {
-              key: item.id,
-              "data-item-id": item.id,
-            }, [textNode(item.label)])
-          ))),
-        ]);
+        ]));
       });
 
-      mountRoot(document.getElementById("app"), Root);
+      Root.mount(document.getElementById("app"), {
+        communityName: COMMUNITY_NAME,
+      });
     </script>
   </body>
 </html>

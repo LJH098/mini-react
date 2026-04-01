@@ -1,0 +1,14 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+describe("runtime demo markup", () => {
+  it("week5 service demo mentions login, like, and writing flows", () => {
+    const html = readFileSync(resolve(process.cwd(), "runtime-demo.html"), "utf8");
+
+    expect(html).toContain("로그인 체험");
+    expect(html).toContain("좋아요");
+    expect(html).toContain("글쓰기");
+    expect(html).toContain("localStorage");
+  });
+});

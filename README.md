@@ -1,150 +1,130 @@
-# DOM-VDOM 프로젝트
+# mini-react
 
-## 프로젝트 개요
+기존 Virtual DOM 엔진 위에 key 기반 child reconciliation과 루트 전용 mini React runtime을 얹은 과제 프로젝트입니다.
 
-- DOM과 Virtual DOM 사이의 핵심 흐름을 직접 구현하고, 변경 사항을 안전하게 반영하는 과정을 하나의 결과물로 정리한 프로젝트입니다. 
-- `domToVdom`, `vdomToDom`, `diff`, `applyPatches`, `renderTo`, `createHistory`를 기능별로 분리해 구현
-- 최종적으로는 `history`와 UI를 연결해 상태 변화와 결과를 직접 확인할 수 있는 데모 화면까지 구성
+## 구성
 
-## 기능 테스트
+이 프로젝트는 두 층으로 나뉩니다.
 
-- 기능 구현은 모듈 단위로 나누어 검증했습니다. 각 기능이 독립적으로 올바르게 동작하는지 확인하는 동시에, 실제 사용 과정에서 발생할 수 있는 경계 조건도 함께 테스트
-- 구현 모듈: `domToVdom`, `vdomToDom`, `diff`, `applyPatches`, `renderTo`, `createHistory`
-- 테스트 범위: DOM-VDOM 변환, 변경 사항 계산, patch 적용, 렌더링, history 관리
-- 검증 포인트: 루트 교체, 잘못된 입력 처리, 엣지 케이스, undo/redo 흐름
+1. Virtual DOM 엔진
+- `domToVdom`
+- `vdomToDom`
+- `diff`
+- `applyPatches`
+- `renderTo`
+- `history`
 
-<br/>
-<br/>
+2. Root-only runtime
+- `FunctionComponent`
+- `mountRoot`
+- `useState`
+- `useEffect`
+- `useMemo`
 
-### 기능 테스트 결과 화면
-<img width="826" height="736" alt="image" src="https://github.com/user-attachments/assets/e834d105-8bea-4135-a412-0837d94acf20" />
+## 핵심 포인트
 
+- 기존 VDOM + Diff + Patch 구조를 유지합니다.
+- child diff는 `props.key`를 사용하는 keyed reconciliation을 지원합니다.
+- keyed reorder에서는 `PatchType.MOVE`로 기존 DOM node identity를 유지합니다.
+- `key`는 reconciliation metadata만 담당하고 실제 DOM attribute로 렌더링되지 않습니다.
+- hooks와 state는 루트 컴포넌트에서만 지원합니다.
+- 자식 컴포넌트는 props만 받는 stateless plain function입니다.
 
+## Runtime API
 
-## 협업 방식
+### `FunctionComponent`
 
-- 기능을 역할별로 분리해 병렬로 진행한 뒤, 브랜치와 PR을 통해 통합하는 방식으로 운영 
-- 위승철: `domToVdom`, `vdomToDom`, `renderTo`, 테스트 보강
-- 이진혁: `diff`, `applyPatches`
-- 양시준: `createHistory`, 데모 UI, 전체 통합
+루트 컴포넌트를 감싸는 클래스입니다. 이 인스턴스가 직접 runtime 상태를 가집니다.
 
+- `hooks`
+- `hookIndex`
+- `pendingEffects`
+- `mount(container, initialProps)`
+- `update(nextProps)`
+- `unmount()`
 
+렌더 함수는 함수형으로 유지되며 `(props, helpers) => vnode` 형태를 지원합니다.
 
-<br/>
-<br/>
+```js
+const Root = new FunctionComponent((props, { renderChild }) => {
+  const [count, setCount] = useState(0);
 
-### 브랜치와 PR 기반 협업 흐름
-<img width="1440" height="1050" alt="image" src="https://github.com/user-attachments/assets/d9cb1806-d6ed-492e-8f3f-2ee4fc561119" />
+  return elementNode("section", {}, [
+    renderChild(Row, { label: "count", value: String(count) }),
+  ]);
+});
+```
 
-<img width="4320" height="2328" alt="image" src="https://github.com/user-attachments/assets/1ead4ce6-22e6-45f3-8c2f-1a9034470a91" />
+### `mountRoot`
 
+기존 사용성을 위한 얇은 wrapper입니다.
 
+```js
+const app = mountRoot(container, Root, { initialCount: 1 });
+app.rerender();
+app.setProps({ initialCount: 2 });
+app.unmount();
+```
 
-<br/>
-<br/>
+### Hooks
 
-### git 이슈 생성 스킬
-<img width="1504" height="546" alt="image" src="https://github.com/user-attachments/assets/47f94957-95b8-46d1-a492-ff348044a11f" />
-<img width="1504" height="576" alt="image" src="https://github.com/user-attachments/assets/1f02c1cd-0fbd-4e5e-8314-498b3dc64468" />
-<img width="1265" height="870" alt="image" src="https://github.com/user-attachments/assets/41c47bec-189f-4904-b492-dff079816d49" />
+- `useState`
+  - 값 또는 updater 함수를 받습니다.
+  - `Object.is(prev, next)`가 같으면 rerender를 생략합니다.
+- `useMemo`
+  - `{ value, deps }`를 캐시합니다.
+  - deps는 `Object.is` 기반 shallow compare를 사용합니다.
+- `useEffect`
+  - commit 이후 실행됩니다.
+  - deps 변경 시 이전 cleanup을 먼저 실행합니다.
+  - `unmount()` 때 cleanup을 정리합니다.
 
+## Browser Entry Points
 
+- `/`
+  - 과제 허브 페이지입니다.
+  - Week 5 커뮤니티 서비스 데모와 Week 4 Diff / History Demo 링크를 제공합니다.
+- `/runtime-demo.html`
+  - 이번 주 과제 메인 데모입니다.
+  - mini-react로 만든 네이버 카페형 커뮤니티 서비스 화면입니다.
+  - 로그인/로그아웃, 글쓰기, 수정, 좋아요, 검색, 카테고리 필터, 정렬을 보여줍니다.
+  - 게시글 목록은 `post.id` key로 렌더링되고, 인기순 정렬에서 좋아요 변화가 reorder로 이어집니다.
+- `/history-demo.html`
+  - 기존 Week 4 Diff / History 데모입니다.
+  - 편집 가능한 DOM 비교, patch 적용, history 이동을 그대로 확인할 수 있습니다.
 
-## 데모 및 결과 확인
+## 실행 방법
 
-- 최종 결과물은 기능 구현에서 끝나지 않고, 사용자가 상태 변화와 결과를 직접 확인할 수 있는 데모 화면까지 포함
-- `history`와 UI를 연결해 undo/redo 흐름을 시각적으로 확인할 수 있도록 구성했고, snapshot 기반 상태 관리가 실제로 어떻게 동작하는지 한눈에 파악
+```bash
+npm install
+npm run dev
+```
 
-# 테스트
+브라우저에서 Vite 주소를 연 뒤 아래 페이지를 확인하면 됩니다.
 
-## History
+- `/`
+- `/runtime-demo.html`
+- `/history-demo.html`
 
+## 테스트
 
-| Test Case                        | Status |
-| -------------------------------- | ------ |
-| createHistory 함수 export          | ✅      |
-| 초기 snapshot 상태 설정                | ✅      |
-| undo / redo 이동                   | ✅      |
-| undo 후 새 snapshot push 시 redo 제거 | ✅      |
-| 외부 수정에도 내부 history 불변성 유지        | ✅      |
+```bash
+npm test
+```
 
+현재 저장소에는 diff, patch, history, runtime 관련 테스트가 포함되어 있습니다.
 
-## 2. DOM → VDOM
+## Week 5 서비스 데모 확인 포인트
 
+- 로그아웃 상태에서는 소개 화면과 인기글 미리보기만 보입니다.
+- 로그인하면 게시판 레이아웃이 열리고 글쓰기와 수정 버튼이 나타납니다.
+- 좋아요 버튼은 로그인 상태에서만 활성화되며, 누를 때마다 좋아요 수가 바로 반영됩니다.
+- `인기순` 정렬에서 좋아요를 누르면 게시글 순서가 바뀌면서 keyed diff가 자연스럽게 동작합니다.
+- 게시글과 로그인 상태는 `localStorage`에 저장되어 새로고침 뒤에도 유지됩니다.
 
-| Test Case        | Status |
-| ---------------- | ------ |
-| domToVdom export | ✅      |
-| Text node 변환     | ✅      |
-| Element 트리 변환    | ✅      |
-| comment node 무시  | ✅      |
+## 실제 React와의 차이점
 
-
-## 3. VDOM → DOM
-
-
-| Test Case                 | Status |
-| ------------------------- | ------ |
-| vdomToDom export          | ✅      |
-| Text vnode → Text DOM     | ✅      |
-| props + children 렌더링      | ✅      |
-| 중첩 vnode 재귀 처리            | ✅      |
-| invalid vnode → TypeError | ✅      |
-
-
-## 4. Diff
-
-
-| Test Case                     | Status |
-| ----------------------------- | ------ |
-| diff export                   | ✅      |
-| props / text / children 변경 감지 | ✅      |
-| node type 변경 처리               | ✅      |
-| invalid vnode → TypeError     | ✅      |
-
-
-## 5. Patch
-
-
-| Test Case                     | Status |
-| ----------------------------- | ------ |
-| diff export                   | ✅      |
-| props / text / children 변경 감지 | ✅      |
-| node type 변경 처리               | ✅      |
-| invalid vnode → TypeError     | ✅      |
-
-
-## 6. Render
-
-
-| Test Case         | Status |
-| ----------------- | ------ |
-| renderTo export   | ✅      |
-| 초기 렌더             | ✅      |
-| 전체 교체 렌더          | ✅      |
-| round-trip 일관성 유지 | ✅      |
-
-
-## 7. Edge Cases
-
-
-| Category          | Description                | Status |
-| ----------------- | -------------------------- | ------ |
-| Partial update    | 변경된 leaf만 patch 생성         | ✅      |
-| DOM reuse         | 형제 노드 identity 유지          | ✅      |
-| No-op             | 동일 vnode → 빈 patch         | ✅      |
-| Subtree removal   | 부모 삭제 시 안전 정리              | ✅      |
-| Root ops          | root replace/remove/add 처리 | ✅      |
-| Front insertion   | DOM 결과는 맞고 identity 일부 손실  | ✅      |
-| Reorder           | move 없이 index 기반 처리        | ✅      |
-| Invalid vnode     | 모든 API에서 TypeError         | ✅      |
-| Invalid patch     | 잘못된 patch → TypeError      | ✅      |
-| Invalid path      | 존재하지 않는 경로 무시              | ✅      |
-| Prop removal      | undefined 처리 및 DOM 반영      | ✅      |
-| Prop types        | boolean/null/undefined 처리  | ✅      |
-| class handling    | className canonicalize     | ✅      |
-| Attribute support | data-*, aria-*, style 등    | ✅      |
-| Void elements     | 자식 없이 처리                   | ✅      |
-| Empty text        | "", null → "" 정규화          | ✅      |
-
-
+- hooks는 루트 컴포넌트에서만 지원합니다.
+- child local state와 child component instance는 없습니다.
+- fiber, scheduler, context, reducer, refs, batching을 구현하지 않았습니다.
+- 학습용 구현이므로 작고 설명 가능한 구조를 우선했습니다.
