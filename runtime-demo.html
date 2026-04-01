@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Green Cafe Community Demo</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap");
       :root {
         color-scheme: light;
-        --primary: #173829;
-        --primary-soft: #2e4f3f;
-        --secondary-chip: #d7e4c7;
-        --page-bg: #f9f9f7;
-        --surface-low: #f4f4f2;
+        --primary: #03c75a;
+        --primary-soft: #02b350;
+        --secondary-chip: #e9f9ef;
+        --page-bg: #f5f6f7;
+        --surface-low: #f7f9fa;
         --surface-card: #ffffff;
-        --ink: #1a1c1b;
-        --muted: #5f6661;
-        --outline-soft: rgba(65, 72, 68, 0.16);
-        --outline-ghost: rgba(65, 72, 68, 0.08);
-        --ambient-shadow: 0 20px 40px rgba(23, 56, 41, 0.06);
+        --ink: #222426;
+        --muted: #6f757b;
+        --outline-soft: rgba(15, 19, 23, 0.12);
+        --outline-ghost: rgba(15, 19, 23, 0.08);
+        --ambient-shadow: 0 10px 24px rgba(15, 19, 23, 0.08);
       }
 
       html {
@@ -57,6 +57,23 @@
         overflow-wrap: break-word;
       }
 
+      .material-symbols-outlined {
+        font-family: "Material Symbols Outlined";
+        font-weight: normal;
+        font-style: normal;
+        font-size: 20px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        font-feature-settings: "liga";
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+
       #app {
         width: 100%;
       }
@@ -78,7 +95,7 @@
       .footer-card {
         background: var(--surface-card);
         border: 1px solid var(--outline-ghost);
-        border-radius: 8px;
+        border-radius: 10px;
         box-shadow: var(--ambient-shadow);
       }
 
@@ -121,7 +138,7 @@
       .brand-copy strong {
         font-size: 20px;
         letter-spacing: -0.02em;
-        font-family: "Cinzel", "Noto Serif KR", serif;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
         color: var(--primary);
       }
 
@@ -146,7 +163,7 @@
         padding: 12px 16px;
         border-radius: 999px;
         background: var(--surface-low);
-        border: 1px solid transparent;
+        border: 1px solid rgba(15, 19, 23, 0.07);
       }
 
       .search-shell input {
@@ -197,7 +214,7 @@
 
       .primary-button {
         padding: 11px 17px;
-        border-radius: 6px;
+        border-radius: 8px;
         background: linear-gradient(130deg, var(--primary), var(--primary-soft));
         color: #fff;
         font-weight: 700;
@@ -206,7 +223,7 @@
 
       .ghost-button {
         padding: 12px 18px;
-        border-radius: 6px;
+        border-radius: 8px;
         background: var(--surface-low);
         border: 1px solid var(--outline-ghost);
         color: var(--ink);
@@ -215,7 +232,7 @@
 
       .soft-button {
         padding: 10px 14px;
-        border-radius: 6px;
+        border-radius: 8px;
         background: var(--secondary-chip);
         color: var(--primary);
         font-weight: 700;
@@ -274,7 +291,7 @@
         font-size: clamp(28px, 3.6vw, 40px);
         line-height: 1.24;
         letter-spacing: -0.03em;
-        font-family: "Cinzel", "Noto Serif KR", serif;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
         color: var(--primary);
       }
 
@@ -315,6 +332,18 @@
       .stat-pill span {
         color: var(--muted);
         font-size: 13px;
+      }
+
+      .stat-pill-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(23, 56, 41, 0.1);
+        color: var(--primary);
+        font-size: 16px;
       }
 
       .preview-list {
@@ -870,60 +899,21 @@
 
       /* Editorial botanical recreation overrides */
       body {
-        background: #eaf4ee;
+        background: #ffffff;
         overflow-x: hidden;
       }
 
       body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -2;
-        background:
-          radial-gradient(circle at 18% 14%, rgba(194, 222, 206, 0.45), transparent 36%),
-          radial-gradient(circle at 82% 80%, rgba(172, 204, 185, 0.4), transparent 34%),
-          linear-gradient(135deg, #edf8f1 0%, #dff0e5 48%, #d2e8dc 100%);
+        content: none;
       }
 
       body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        background:
-          radial-gradient(circle at 14% 12%, rgba(199, 218, 189, 0.22), transparent 34%),
-          radial-gradient(circle at 82% 84%, rgba(130, 157, 139, 0.2), transparent 30%),
-          linear-gradient(180deg, rgba(9, 18, 14, 0.2), rgba(9, 18, 14, 0.58));
-        backdrop-filter: blur(1px);
-        animation: ambientPulse 12s ease-in-out infinite alternate;
+        content: none;
       }
 
       .page-shell::before,
       .page-shell::after {
-        content: "";
-        position: fixed;
-        pointer-events: none;
-        z-index: -1;
-        border-radius: 999px;
-        filter: blur(24px);
-      }
-
-      .page-shell::before {
-        width: 340px;
-        height: 340px;
-        top: 8%;
-        left: 6%;
-        background: rgba(215, 228, 199, 0.2);
-        animation: orbFloatA 18s ease-in-out infinite;
-      }
-
-      .page-shell::after {
-        width: 300px;
-        height: 300px;
-        right: 8%;
-        bottom: 8%;
-        background: rgba(108, 141, 123, 0.22);
-        animation: orbFloatB 16s ease-in-out infinite;
+        content: none;
       }
 
       .page-shell {
@@ -948,8 +938,8 @@
         border-radius: 0 0 14px 14px;
         margin: 0 -24px;
         padding: 20px 32px;
-        background: rgba(245, 246, 242, 0.9);
-        box-shadow: 0 8px 24px rgba(23, 56, 41, 0.08);
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 6px 16px rgba(15, 19, 23, 0.08);
         backdrop-filter: blur(14px);
         animation: topbarFade 700ms ease-out both;
       }
@@ -959,7 +949,7 @@
       .board-title-row h2,
       .detail-title,
       .sidebar-card h3 {
-        font-family: "Cinzel", "Noto Serif KR", serif;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
         font-weight: 600;
       }
 
@@ -969,11 +959,11 @@
         grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
         align-items: end;
         background:
-          radial-gradient(circle at 16% 22%, rgba(255, 255, 255, 0.34), transparent 40%),
-          linear-gradient(118deg, rgba(88, 126, 105, 0.84), rgba(124, 160, 141, 0.78));
-        color: #f8fffb;
+          radial-gradient(circle at 16% 22%, rgba(255, 255, 255, 0.22), transparent 42%),
+          linear-gradient(118deg, rgba(3, 199, 90, 0.95), rgba(2, 179, 80, 0.92));
+        color: #ffffff;
         padding: 36px;
-        box-shadow: 0 32px 64px rgba(12, 28, 21, 0.32);
+        box-shadow: 0 24px 48px rgba(114, 149, 95, 0.22);
         overflow: hidden;
       }
 
@@ -997,12 +987,25 @@
       .hero .board-header h2,
       .hero .board-header p,
       .preview-meta {
-        color: #eff3ec;
+        color: #ffffff;
+      }
+
+      .hero .stat-pill {
+        background: rgba(255, 255, 255, 0.94);
+        color: var(--primary);
+      }
+
+      .hero .stat-pill strong {
+        color: var(--primary);
+      }
+
+      .hero .stat-pill span {
+        color: #486056;
       }
 
       .hero-copy h1 {
-        font-size: clamp(36px, 4.6vw, 64px);
-        line-height: 1.05;
+        font-size: clamp(30px, 3.8vw, 50px);
+        line-height: 1.12;
       }
 
       .hero-copy p {
@@ -1010,14 +1013,14 @@
       }
 
       .hero .preview-card {
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.18);
         border: 0;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 16px;
       }
 
       .hero .category-tag {
-        background: rgba(215, 228, 199, 0.9);
+        background: rgba(255, 255, 255, 0.9);
       }
 
       .service-grid {
@@ -1039,34 +1042,38 @@
 
       .board-card,
       .detail-card {
-        background: rgba(255, 255, 255, 0.94);
-        box-shadow: 0 22px 44px rgba(23, 56, 41, 0.08);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 20px 40px rgba(120, 154, 101, 0.14);
       }
 
       .sidebar-card {
-        background: linear-gradient(180deg, #f4f4f2 0%, #eef0ec 100%);
+        background: #f7f9fa;
         position: sticky;
         top: 88px;
+        border: 1px solid rgba(15, 19, 23, 0.08);
       }
 
       .menu-item {
-        border-radius: 8px;
+        border-radius: 10px;
+        padding: 12px 14px;
       }
 
       .menu-item.active {
-        background: rgba(215, 228, 199, 0.65);
+        background: #ffffff;
+        border-color: rgba(15, 19, 23, 0.1);
+        box-shadow: 0 2px 10px rgba(15, 19, 23, 0.05);
       }
 
       .post-list {
-        gap: 18px;
+        gap: 14px;
       }
 
       .post-row {
         border: 0;
-        border-radius: 12px;
+        border-radius: 10px;
         background: #fff;
-        box-shadow: 0 10px 20px rgba(23, 56, 41, 0.05);
-        border-left: 4px solid rgba(23, 56, 41, 0.12);
+        box-shadow: 0 10px 20px rgba(119, 153, 99, 0.12);
+        border-left: 4px solid rgba(3, 199, 90, 0.2);
         transition:
           transform 220ms ease,
           box-shadow 220ms ease,
@@ -1075,8 +1082,8 @@
 
       .post-row:hover,
       .post-row.selected {
-        border-left-color: rgba(23, 56, 41, 0.45);
-        box-shadow: 0 20px 36px rgba(23, 56, 41, 0.12);
+        border-left-color: rgba(3, 199, 90, 0.72);
+        box-shadow: 0 16px 28px rgba(3, 199, 90, 0.16);
       }
 
       .primary-button {
@@ -1114,11 +1121,12 @@
       }
 
       .debug-panel {
-        background: rgba(244, 244, 242, 0.95);
+        background: rgba(242, 250, 235, 0.95);
         z-index: 120;
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+        border-left: 1px solid rgba(3, 199, 90, 0.18);
       }
 
       .debug-panel.open {
@@ -1541,7 +1549,10 @@
       function TopBar(props) {
         return h("header", { className: "topbar" }, [
           h("div", { className: "brand-block" }, [
-            h("span", { className: "brand-badge" }, [t(COMMUNITY_NAME)]),
+            h("span", { className: "brand-badge" }, [
+              h("span", { className: "material-symbols-outlined" }, [t("forum")]),
+              t(` ${COMMUNITY_NAME}`),
+            ]),
             h("div", { className: "brand-copy" }, [
               h("strong", {}, [t("우리 동네 프론트엔드 카페")]),
               h("span", {}, [t("로그인, 글쓰기, 수정, 좋아요를 mini-react 상태만으로 보여줍니다.")]),
@@ -1571,6 +1582,7 @@
 
       function StatPill(props) {
         return h("div", { className: "stat-pill" }, [
+          h("span", { className: "stat-pill-icon material-symbols-outlined" }, [t(props.icon)]),
           h("strong", {}, [t(props.value)]),
           h("span", {}, [t(props.label)]),
         ]);
@@ -1579,8 +1591,11 @@
       function LoginHero(props) {
         return h("section", { className: "hero" }, [
           h("div", { className: "hero-copy" }, [
-            h("span", { className: "eyebrow" }, [t("community preview")]),
-            h("h1", {}, [t("로그인하면 글쓰기와 좋아요까지 가능한 게시판 데모가 열립니다.")]),
+            h("span", { className: "eyebrow" }, [
+              h("span", { className: "material-symbols-outlined" }, [t("auto_stories")]),
+              t(" community preview"),
+            ]),
+            h("h1", {}, [t("우리 동네 프론트엔드 카페")]),
             h("p", {}, [
               t("백엔드 없이도 로그인 상태, 게시글 권한, 좋아요, 정렬, 검색 흐름을 실제 서비스처럼 시연합니다."),
             ]),
@@ -1589,12 +1604,15 @@
                 type: "button",
                 className: "primary-button",
                 onclick: props.onLogin,
-              }, [t("로그인하고 둘러보기")]),
+              }, [
+                h("span", { className: "material-symbols-outlined" }, [t("login")]),
+                t(" 로그인하고 둘러보기"),
+              ]),
             ]),
             h("div", { className: "hero-stats" }, [
-              StatPill({ value: formatCount(props.summary.totalPosts), label: "전체 게시글" }),
-              StatPill({ value: formatCount(props.summary.totalLikes), label: "누적 좋아요" }),
-              StatPill({ value: formatCount(props.summary.totalComments), label: "누적 댓글" }),
+              StatPill({ icon: "article", value: formatCount(props.summary.totalPosts), label: "전체 게시글" }),
+              StatPill({ icon: "favorite", value: formatCount(props.summary.totalLikes), label: "누적 좋아요" }),
+              StatPill({ icon: "chat", value: formatCount(props.summary.totalComments), label: "누적 댓글" }),
             ]),
           ]),
           h("div", { className: "hero-preview" }, [
@@ -1622,7 +1640,7 @@
         return h("div", { className: "sidebar-stack" }, [
           h("section", { className: "sidebar-card" }, [
             h("h3", {}, [t("카테고리")]),
-            h("p", { className: "muted" }, [t("필터를 바꾸면 목록이 바로 갱신됩니다.")]),
+            h("p", { className: "muted" }, [t("")]),
             h("div", { className: "menu-list" }, props.categories.map((category) => (
               h("button", {
                 type: "button",
@@ -1656,7 +1674,10 @@
                 type: "button",
                 className: "soft-button",
                 onclick: props.onOpenCreate,
-              }, [t("새 글 작성")])
+              }, [
+                h("span", { className: "material-symbols-outlined" }, [t("edit_square")]),
+                t(" 새 글 작성"),
+              ])
               : h("span", { className: "outline-tag" }, [t("로그인 후 글쓰기 가능")]),
           ]),
           h("div", { className: "sort-row" }, [
@@ -1719,7 +1740,8 @@
           onclick: props.onToggleLike,
           title: props.isLoggedIn ? "좋아요 토글" : "로그인 후 사용할 수 있습니다",
         }, [
-          t(props.liked ? `좋아요 취소 · ${formatCount(props.likes)}` : `좋아요 · ${formatCount(props.likes)}`),
+          h("span", { className: "material-symbols-outlined" }, [t("favorite")]),
+          t(props.liked ? ` 좋아요 취소 · ${formatCount(props.likes)}` : ` 좋아요 · ${formatCount(props.likes)}`),
         ]);
       }
 

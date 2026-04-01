@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mini-react demos</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap");
       :root {
         color-scheme: light;
         --primary: #173829;
@@ -70,6 +70,18 @@
         overflow-wrap: break-word;
       }
 
+      .material-symbols-outlined {
+        font-family: "Material Symbols Outlined";
+        font-weight: normal;
+        font-style: normal;
+        font-size: 18px;
+        line-height: 1;
+        display: inline-block;
+        white-space: nowrap;
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+
       main {
         max-width: 1040px;
         margin: 0 auto;
@@ -106,7 +118,7 @@
 
       .hero h1,
       .card h2 {
-        font-family: "Cinzel", "Noto Serif KR", serif;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
         color: var(--primary);
       }
 
@@ -158,6 +170,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        gap: 6px;
         padding: 11px 16px;
         border-radius: 6px;
         background: linear-gradient(130deg, var(--primary), var(--primary-soft));
@@ -191,7 +204,10 @@
   <body>
     <main>
       <section class="hero">
-        <span class="badge">mini-react assignment hub</span>
+        <span class="badge">
+          <span class="material-symbols-outlined">dashboard</span>
+          mini-react assignment hub
+        </span>
         <h1>Virtual DOM 엔진 위에 루트 전용 Hooks runtime을 얹은 과제 결과물</h1>
         <p class="muted">
           이번 주 과제용 Component / State / Hooks 데모와 지난 주 Diff / History 데모를
@@ -201,7 +217,10 @@
 
       <section class="cards">
         <article class="card">
-          <span class="badge">Week 5</span>
+          <span class="badge">
+            <span class="material-symbols-outlined">forum</span>
+            Week 5
+          </span>
           <h2>커뮤니티 서비스 Demo</h2>
           <p class="muted">
             네이버 카페형 게시판을 mini-react로 구성한 화면입니다. 로그인/로그아웃, 글쓰기,
@@ -212,11 +231,17 @@
             <li>좋아요 변화에 따른 인기순 목록 재정렬</li>
             <li>mock 데이터 + localStorage 기반 시연</li>
           </ul>
-          <a class="button" href="/runtime-demo.html">Open Week 5 Demo</a>
+          <a class="button" href="/runtime-demo.html">
+            <span class="material-symbols-outlined">arrow_forward</span>
+            Open Week 5 Demo
+          </a>
         </article>
 
         <article class="card">
-          <span class="badge">Week 4</span>
+          <span class="badge">
+            <span class="material-symbols-outlined">history</span>
+            Week 4
+          </span>
           <h2>Diff / History Demo</h2>
           <p class="muted">
             Virtual DOM Diff &amp; Patch 과제를 분리한 페이지입니다. snapshot 이동과 patch
@@ -227,7 +252,10 @@
             <li>Patch, Back, Forward 흐름 유지</li>
             <li>히스토리별 patch 상세 확인</li>
           </ul>
-          <a class="button alt" href="/history-demo.html">Open Week 4 Demo</a>
+          <a class="button alt" href="/history-demo.html">
+            <span class="material-symbols-outlined">arrow_forward</span>
+            Open Week 4 Demo
+          </a>
         </article>
       </section>
     </main>
