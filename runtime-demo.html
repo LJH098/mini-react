@@ -630,6 +630,62 @@
         border: 0;
       }
 
+      .debug-toggle {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 22;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(20, 168, 92, 0.35);
+        background: #fff;
+        color: var(--green-700);
+        font-weight: 700;
+        box-shadow: 0 12px 24px rgba(18, 35, 24, 0.12);
+      }
+
+      .debug-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 21;
+        width: min(430px, calc(100vw - 20px));
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.97);
+        border-left: 1px solid var(--line);
+        box-shadow: -16px 0 32px rgba(15, 30, 20, 0.14);
+        transform: translateX(100%);
+        transition: transform 0.22s ease;
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+
+      .debug-panel.open {
+        transform: translateX(0);
+      }
+
+      .debug-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .debug-header strong {
+        font-size: 15px;
+      }
+
+      .debug-content {
+        margin: 0;
+        padding: 14px 16px 24px;
+        overflow: auto;
+        font-size: 12px;
+        line-height: 1.55;
+        background: #fbfdfb;
+      }
+
       @media (max-width: 1180px) {
         .service-grid {
           grid-template-columns: 220px minmax(0, 1fr);
@@ -1237,6 +1293,22 @@
         ]));
       }
 
+      function DebugPanel(props) {
+        return h("aside", {
+          className: `debug-panel${props.open ? " open" : ""}`,
+        }, [
+          h("div", { className: "debug-header" }, [
+            h("strong", {}, [t("런타임 디버그 패널")]),
+            h("button", {
+              type: "button",
+              className: "ghost-button",
+              onclick: props.onToggle,
+            }, [t(props.open ? "닫기" : "열기")]),
+          ]),
+          h("pre", { className: "debug-content" }, [t(props.debugText)]),
+        ]);
+      }
+
       const persistedState = loadPersistedState();
 
       const Root = new FunctionComponent((props, { renderChild }) => {
@@ -1250,6 +1322,7 @@
         const [draftTitle, setDraftTitle] = useState("");
         const [draftBody, setDraftBody] = useState("");
         const [saveNotice, setSaveNotice] = useState("브라우저에 자동 저장됩니다.");
+        const [isDebugPanelOpen, setIsDebugPanelOpen] = useState(false);
 
         const categories = useMemo(() => ["전체", ...CATEGORY_ORDER], []);
 
@@ -1455,6 +1528,20 @@
             ? "자유"
             : selectedCategory;
 
+        const debugSnapshot = {
+          isLoggedIn,
+          composerMode,
+          selectedCategory,
+          sortMode,
+          searchQuery,
+          selectedPostId,
+          totalPosts: posts.length,
+          visiblePosts: visiblePosts.length,
+          featuredPosts: featuredPosts.length,
+          currentCategoryLabel,
+          saveNotice,
+        };
+
         return h("div", { className: "page-shell" }, compact([
           renderChild(TopBar, {
             isLoggedIn,
@@ -1530,6 +1617,16 @@
             h("strong", {}, [t("Week 5 체크 포인트")]),
             h("p", {}, [t("로그인 상태에 따라 화면이 바뀌고, 인기순에서 좋아요를 누르면 게시글 순서가 자연스럽게 다시 정렬됩니다.")]),
           ]),
+          h("button", {
+            type: "button",
+            className: "debug-toggle",
+            onclick: () => setIsDebugPanelOpen((open) => !open),
+          }, [t(isDebugPanelOpen ? "디버그 닫기" : "디버그 열기")]),
+          renderChild(DebugPanel, {
+            open: isDebugPanelOpen,
+            onToggle: () => setIsDebugPanelOpen((open) => !open),
+            debugText: JSON.stringify(debugSnapshot, null, 2),
+          }),
         ]));
       });
 
