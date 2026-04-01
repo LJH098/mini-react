@@ -10,5 +10,7 @@ describe("runtime demo markup", () => {
     expect(html).toContain("좋아요");
     expect(html).toContain("글쓰기");
     expect(html).toContain("localStorage");
+    expect(html).toContain("디버그 열기");
+    expect(html).toContain("런타임 디버그 패널");
   });
 });
