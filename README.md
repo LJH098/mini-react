@@ -1,4 +1,4 @@
-<img width="490" height="489" alt="image" src="https://github.com/user-attachments/assets/6b3b3160-0408-4fd3-ab25-f992cbb6b9fa" />
+<img width="1024" height="1024" alt="url_qrcodecreator com_01_17_45" src="https://github.com/user-attachments/assets/ed16d1cc-7261-4f09-8f54-ad7b0bd6d8e6" />
 
 # mini-react
 
