@@ -11,21 +11,61 @@ function CounterLabel(props) {
 }
 
 describe("root runtime", () => {
-  it("initial mount renders the root FunctionComponent and plain child function together", () => {
+  it("FunctionComponent.mount가 runtime state를 저장하고 초기 렌더를 수행한다", () => {
     const container = document.createElement("div");
-    const Root = new FunctionComponent((props) => {
+    const Root = new FunctionComponent((props, { renderChild }) => {
       const [count] = useState(props.initialCount);
 
       return elementNode("section", { id: "app" }, [
-        CounterLabel({ label: "Count", value: String(count) }),
+        renderChild(CounterLabel, { label: "Count", value: String(count) }),
       ]);
     });
 
-    mountRoot(container, Root, { initialCount: 1 });
+    const rootDom = Root.mount(container, { initialCount: 1 });
 
+    expect(rootDom).toBe(container.firstChild);
     expect(container.innerHTML).toBe(
       '<section id="app"><p data-kind="child">Count: 1</p></section>',
     );
+    expect(Root.container).toBe(container);
+    expect(Root.rootProps).toEqual({ initialCount: 1 });
+    expect(Root.hooks).toHaveLength(1);
+    expect(Root.hookCount).toBe(1);
+    expect(Root.currentVdom).not.toBeNull();
+    expect(Root.isMounted).toBe(true);
+  });
+
+  it("FunctionComponent.update가 diff + applyPatches로 다시 렌더링한다", () => {
+    const container = document.createElement("div");
+    const Root = new FunctionComponent((props, { renderChild }) => (
+      elementNode("section", { "data-title": props.title }, [
+        renderChild(CounterLabel, { label: props.title, value: props.value }),
+      ])
+    ));
+
+    Root.mount(container, { title: "Before", value: "1" });
+    const originalRoot = container.firstChild;
+    const originalChild = originalRoot.firstChild;
+
+    Root.update({ title: "After", value: "2" });
+
+    expect(container.firstChild).toBe(originalRoot);
+    expect(container.firstChild.firstChild).toBe(originalChild);
+    expect(container.innerHTML).toBe(
+      '<section data-title="After"><p data-kind="child">After: 2</p></section>',
+    );
+  });
+
+  it("mountRoot는 기존 사용성을 유지하는 compatibility wrapper로 동작한다", () => {
+    const container = document.createElement("div");
+    const Root = new FunctionComponent((props) => (
+      elementNode("section", {}, [textNode(props.label)])
+    ));
+
+    const runtime = mountRoot(container, Root, { label: "hello" });
+    runtime.setProps({ label: "world" });
+
+    expect(container.textContent).toBe("world");
   });
 
   it("useState setter가 root를 다시 렌더링하고 Object.is가 같으면 skip한다", () => {
@@ -33,17 +73,17 @@ describe("root runtime", () => {
     let setCount;
     let renderCount = 0;
 
-    const Root = new FunctionComponent(() => {
+    const Root = new FunctionComponent((props, { renderChild }) => {
       const [count, setState] = useState(0);
       setCount = setState;
       renderCount += 1;
 
       return elementNode("section", {}, [
-        CounterLabel({ label: "Count", value: String(count) }),
+        renderChild(CounterLabel, { label: props.label, value: String(count) }),
       ]);
     });
 
-    mountRoot(container, Root);
+    Root.mount(container, { label: "Count" });
     setCount(1);
     setCount(1);
 
@@ -70,7 +110,7 @@ describe("root runtime", () => {
       ]);
     });
 
-    mountRoot(container, Root);
+    Root.mount(container);
     setCount(1);
     setCount(2);
 
@@ -100,9 +140,9 @@ describe("root runtime", () => {
       ]);
     });
 
-    const runtime = mountRoot(container, Root);
+    Root.mount(container);
     setCount(1);
-    runtime.unmount();
+    Root.unmount();
 
     expect(logs).toEqual([
       "effect:0:count:0",
@@ -116,6 +156,21 @@ describe("root runtime", () => {
   it("hooks are only valid during an active root render", () => {
     expect(() => useState(0)).toThrowError(
       new Error("useState must be called during an active root render."),
+    );
+  });
+
+  it("renderChild 안에서 hook을 사용하면 root-only 에러를 던진다", () => {
+    const container = document.createElement("div");
+    const ChildWithHook = () => {
+      useState(0);
+      return textNode("nope");
+    };
+    const Root = new FunctionComponent((props, { renderChild }) => (
+      elementNode("section", {}, [renderChild(ChildWithHook, props)])
+    ));
+
+    expect(() => Root.mount(container)).toThrowError(
+      new Error("Hooks can only be used in the root component."),
     );
   });
 
