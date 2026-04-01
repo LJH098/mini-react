@@ -12,5 +12,8 @@ describe("runtime demo markup", () => {
     expect(html).toContain("localStorage");
     expect(html).toContain("디버그 열기");
     expect(html).toContain("런타임 디버그 패널");
+    expect(html).toContain("Timeline");
+    expect(html).toContain("일시정지");
+    expect(html).toContain("자동스크롤");
   });
 });
