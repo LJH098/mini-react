@@ -9,5 +9,6 @@ export {
   mountRoot,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "./rootRuntime.js";
