@@ -657,7 +657,7 @@
         transform: translateX(100%);
         transition: transform 0.22s ease;
         display: grid;
-        grid-template-rows: auto 1fr;
+        grid-template-rows: auto auto auto 1fr;
       }
 
       .debug-panel.open {
@@ -677,6 +677,80 @@
         font-size: 15px;
       }
 
+      .debug-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #4f5b53;
+        background: #edf2ee;
+      }
+
+      .debug-status.live {
+        color: #0f8f4f;
+        background: #e7f7ee;
+      }
+
+      .debug-controls,
+      .debug-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .debug-select,
+      .debug-search {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        font: inherit;
+        padding: 8px 10px;
+        color: var(--text);
+      }
+
+      .debug-select {
+        min-width: 98px;
+        font-size: 12px;
+      }
+
+      .debug-search {
+        flex: 1;
+        min-width: 150px;
+        font-size: 12px;
+      }
+
+      .debug-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .debug-check input {
+        margin: 0;
+      }
+
+      .debug-tab {
+        border-radius: 999px;
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .debug-tab.active {
+        border-color: rgba(20, 168, 92, 0.25);
+        background: #eaf8ef;
+        color: var(--green-700);
+      }
+
       .debug-content {
         margin: 0;
         padding: 14px 16px 24px;
@@ -684,6 +758,86 @@
         font-size: 12px;
         line-height: 1.55;
         background: #fbfdfb;
+      }
+
+      .debug-log-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .debug-log-item {
+        border: 1px solid #dfe9e3;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+        display: grid;
+        gap: 8px;
+      }
+
+      .debug-log-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .debug-type {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .debug-type.action {
+        color: #0f8f4f;
+        background: #e7f7ee;
+      }
+
+      .debug-type.state {
+        color: #2466c6;
+        background: #eaf2ff;
+      }
+
+      .debug-type.effect {
+        color: #7543c6;
+        background: #efe7ff;
+      }
+
+      .debug-type.warn {
+        color: #b76512;
+        background: #fff1e2;
+      }
+
+      .debug-log-time {
+        color: var(--muted);
+        font-size: 11px;
+        font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      }
+
+      .debug-log-message {
+        margin: 0;
+        color: #2b3830;
+      }
+
+      .debug-log-meta {
+        margin: 0;
+        padding: 8px;
+        border-radius: 8px;
+        background: #f6faf7;
+        border: 1px solid #e5eee8;
+        font-size: 11px;
+        line-height: 1.5;
+        overflow: auto;
+      }
+
+      .debug-empty {
+        border: 1px dashed #c7d7cc;
+        border-radius: 12px;
+        padding: 14px;
+        color: var(--muted);
+        text-align: center;
       }
 
       @media (max-width: 1180px) {
@@ -826,6 +980,7 @@
         textNode as t,
         useEffect,
         useMemo,
+        useRef,
         useState,
       } from "/src/lib.js";
 
@@ -838,6 +993,8 @@
         { id: "popular", label: "인기순" },
         { id: "comments", label: "댓글순" },
       ];
+      const DEBUG_TYPES = ["ALL", "ACTION", "STATE", "EFFECT", "WARN"];
+      const MAX_DEBUG_LOGS = 200;
 
       function compact(children) {
         return children.filter((child) => child !== null && child !== undefined);
@@ -861,6 +1018,15 @@
           hour: "2-digit",
           minute: "2-digit",
         }).format(value);
+      }
+
+      function formatDebugTimestamp(timestamp) {
+        return new Intl.DateTimeFormat("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          fractionalSecondDigits: 3,
+        }).format(timestamp);
       }
 
       function createDefaultPosts() {
@@ -1294,18 +1460,92 @@
       }
 
       function DebugPanel(props) {
+        const controlButtons = props.isPaused
+          ? h("button", {
+            type: "button",
+            className: "soft-button",
+            onclick: props.onTogglePause,
+          }, [t("재개")])
+          : h("button", {
+            type: "button",
+            className: "ghost-button",
+            onclick: props.onTogglePause,
+          }, [t("일시정지")]);
+
         return h("aside", {
           className: `debug-panel${props.open ? " open" : ""}`,
         }, [
           h("div", { className: "debug-header" }, [
-            h("strong", {}, [t("런타임 디버그 패널")]),
+            h("div", {}, [
+              h("strong", {}, [t("런타임 디버그 패널")]),
+              h("div", { className: `debug-status${props.isPaused ? "" : " live"}` }, [
+                t(props.isPaused ? "PAUSED" : "LIVE"),
+              ]),
+            ]),
             h("button", {
               type: "button",
               className: "ghost-button",
               onclick: props.onToggle,
             }, [t(props.open ? "닫기" : "열기")]),
           ]),
-          h("pre", { className: "debug-content" }, [t(props.debugText)]),
+          h("div", { className: "debug-controls" }, [
+            h("select", {
+              className: "debug-select",
+              value: props.typeFilter,
+              onchange: (event) => props.onTypeFilterChange(event.target.value),
+            }, props.typeOptions.map((type) => (
+              h("option", { value: type }, [t(type)])
+            ))),
+            h("input", {
+              className: "debug-search",
+              type: "text",
+              value: props.searchQuery,
+              placeholder: "로그 메시지 검색",
+              oninput: (event) => props.onSearchQueryChange(event.target.value),
+            }, []),
+            h("label", { className: "debug-check" }, [
+              h("input", {
+                type: "checkbox",
+                checked: props.autoScroll,
+                onchange: (event) => props.onAutoScrollChange(event.target.checked),
+              }, []),
+              t("자동스크롤"),
+            ]),
+            controlButtons,
+            h("button", {
+              type: "button",
+              className: "ghost-button",
+              onclick: props.onClear,
+            }, [t("Clear")]),
+          ]),
+          h("div", { className: "debug-tabs" }, [
+            h("button", {
+              type: "button",
+              className: `debug-tab${props.activeTab === "snapshot" ? " active" : ""}`,
+              onclick: () => props.onTabChange("snapshot"),
+            }, [t("Snapshot")]),
+            h("button", {
+              type: "button",
+              className: `debug-tab${props.activeTab === "timeline" ? " active" : ""}`,
+              onclick: () => props.onTabChange("timeline"),
+            }, [t("Timeline")]),
+          ]),
+          props.activeTab === "snapshot"
+            ? h("pre", { className: "debug-content" }, [t(props.debugText)])
+            : h("div", { className: "debug-content debug-log-list" }, (
+              props.logs.length === 0
+                ? [h("div", { className: "debug-empty" }, [t("조건에 맞는 로그가 없습니다.")])]
+                : props.logs.map((log) => (
+                  h("article", { className: "debug-log-item" }, [
+                    h("div", { className: "debug-log-head" }, [
+                      h("span", { className: `debug-type ${log.type.toLowerCase()}` }, [t(log.type)]),
+                      h("span", { className: "debug-log-time" }, [t(formatDebugTimestamp(log.ts))]),
+                    ]),
+                    h("p", { className: "debug-log-message" }, [t(log.message)]),
+                    h("pre", { className: "debug-log-meta" }, [t(JSON.stringify(log.meta, null, 2))]),
+                  ])
+                ))
+            )),
         ]);
       }
 
@@ -1323,6 +1563,13 @@
         const [draftBody, setDraftBody] = useState("");
         const [saveNotice, setSaveNotice] = useState("브라우저에 자동 저장됩니다.");
         const [isDebugPanelOpen, setIsDebugPanelOpen] = useState(false);
+        const [debugLogs, setDebugLogs] = useState([]);
+        const [isDebugPaused, setIsDebugPaused] = useState(false);
+        const [isDebugAutoScroll, setIsDebugAutoScroll] = useState(true);
+        const [debugTypeFilter, setDebugTypeFilter] = useState("ALL");
+        const [debugSearchQuery, setDebugSearchQuery] = useState("");
+        const [debugTab, setDebugTab] = useState("timeline");
+        const prevStateRef = useRef(null);
 
         const categories = useMemo(() => ["전체", ...CATEGORY_ORDER], []);
 
@@ -1366,11 +1613,50 @@
           totalComments: posts.reduce((sum, post) => sum + post.comments, 0),
         }), [posts]);
 
+        const filteredDebugLogs = useMemo(() => {
+          const normalizedQuery = debugSearchQuery.trim().toLowerCase();
+
+          return debugLogs.filter((log) => {
+            const matchesType = debugTypeFilter === "ALL" || log.type === debugTypeFilter;
+            const messageText = `${log.message} ${JSON.stringify(log.meta ?? {})}`.toLowerCase();
+            const matchesSearch = normalizedQuery.length === 0 || messageText.includes(normalizedQuery);
+            return matchesType && matchesSearch;
+          });
+        }, [debugLogs, debugSearchQuery, debugTypeFilter]);
+
+        function appendDebugLog(type, message, meta = {}) {
+          if (isDebugPaused) {
+            return;
+          }
+
+          setDebugLogs((currentLogs) => {
+            const nextLog = {
+              id: `log-${Date.now()}-${currentLogs.length}`,
+              ts: Date.now(),
+              type,
+              message,
+              meta,
+            };
+            const nextLogs = [...currentLogs, nextLog];
+            return nextLogs.length > MAX_DEBUG_LOGS
+              ? nextLogs.slice(nextLogs.length - MAX_DEBUG_LOGS)
+              : nextLogs;
+          });
+        }
+
         useEffect(() => {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({ isLoggedIn, posts }));
+            appendDebugLog("EFFECT", "localStorage 저장 완료", {
+              storageKey: STORAGE_KEY,
+              isLoggedIn,
+              postCount: posts.length,
+            });
           } catch {
             // Ignore storage errors in the browser demo and keep the UI usable.
+            appendDebugLog("WARN", "localStorage 저장 실패", {
+              storageKey: STORAGE_KEY,
+            });
           }
 
           setSaveNotice(`자동 저장됨 · ${formatTimeLabel(new Date())}`);
@@ -1401,29 +1687,79 @@
               : selectedPost?.title ?? props.communityName;
 
           document.title = `${screenTitle} · ${props.communityName}`;
+          appendDebugLog("EFFECT", "document.title 업데이트", {
+            screenTitle,
+          });
 
           return () => {
             document.title = `${props.communityName} Demo`;
           };
         }, [composerMode, selectedPost, props.communityName]);
 
+        useEffect(() => {
+          const previousState = prevStateRef.current;
+          const nextState = {
+            isLoggedIn,
+            selectedCategory,
+            sortMode,
+            selectedPostId,
+            composerMode,
+            totalPosts: posts.length,
+            visiblePosts: visiblePosts.length,
+          };
+
+          if (previousState) {
+            for (const key of Object.keys(nextState)) {
+              if (Object.is(previousState[key], nextState[key])) {
+                continue;
+              }
+
+              appendDebugLog("STATE", `${key} 변경`, {
+                key,
+                from: previousState[key],
+                to: nextState[key],
+              });
+            }
+          } else {
+            appendDebugLog("STATE", "초기 상태 스냅샷 생성", nextState);
+          }
+
+          prevStateRef.current = nextState;
+        }, [isLoggedIn, selectedCategory, sortMode, selectedPostId, composerMode, posts.length, visiblePosts.length]);
+
+        useEffect(() => {
+          if (!isDebugPanelOpen || debugTab !== "timeline" || !isDebugAutoScroll) {
+            return;
+          }
+
+          const logContainer = document.querySelector(".debug-log-list");
+          if (logContainer) {
+            logContainer.scrollTop = logContainer.scrollHeight;
+          }
+        }, [isDebugPanelOpen, debugTab, isDebugAutoScroll, filteredDebugLogs]);
+
         function toggleLogin() {
           setIsLoggedIn((currentValue) => !currentValue);
           setComposerMode("closed");
           setDraftTitle("");
           setDraftBody("");
+          appendDebugLog("ACTION", "로그인 토글 버튼 클릭");
         }
 
         function selectPost(postId) {
           setSelectedPostId(postId);
           setComposerMode("closed");
+          appendDebugLog("ACTION", "게시글 선택", { postId });
         }
 
         function toggleLike(postId) {
           if (!isLoggedIn) {
             setSaveNotice("로그인 후 좋아요를 누를 수 있습니다.");
+            appendDebugLog("WARN", "비로그인 상태에서 좋아요 시도", { postId });
             return;
           }
+
+          appendDebugLog("ACTION", "좋아요 토글", { postId });
 
           setPosts((currentPosts) => currentPosts.map((post) => {
             if (post.id !== postId) {
@@ -1443,16 +1779,19 @@
         function openCreate() {
           if (!isLoggedIn) {
             setSaveNotice("로그인하면 새 글을 작성할 수 있습니다.");
+            appendDebugLog("WARN", "비로그인 상태에서 글쓰기 시도");
             return;
           }
 
           setComposerMode("create");
           setDraftTitle("");
           setDraftBody("");
+          appendDebugLog("ACTION", "글쓰기 패널 열기");
         }
 
         function openEdit(postId) {
           if (!isLoggedIn) {
+            appendDebugLog("WARN", "비로그인 상태에서 글 수정 시도", { postId });
             return;
           }
 
@@ -1466,12 +1805,14 @@
           setDraftTitle(post.title);
           setDraftBody(post.body);
           setComposerMode("edit");
+          appendDebugLog("ACTION", "글 수정 패널 열기", { postId });
         }
 
         function closeComposer() {
           setComposerMode("closed");
           setDraftTitle("");
           setDraftBody("");
+          appendDebugLog("ACTION", "작성 패널 닫기");
         }
 
         function saveDraft() {
@@ -1480,6 +1821,7 @@
 
           if (!normalizedTitle || !normalizedBody) {
             setSaveNotice("제목과 본문을 모두 입력해주세요.");
+            appendDebugLog("WARN", "빈 제목/본문으로 저장 시도");
             return;
           }
 
@@ -1495,6 +1837,9 @@
             )));
             setSaveNotice("게시글을 수정했습니다.");
             setComposerMode("closed");
+            appendDebugLog("ACTION", "게시글 수정 저장", {
+              postId: selectedPostId,
+            });
             return;
           }
 
@@ -1520,6 +1865,10 @@
           setDraftTitle("");
           setDraftBody("");
           setSaveNotice("새 게시글이 추가되었습니다.");
+          appendDebugLog("ACTION", "새 게시글 발행", {
+            postId: nextPostId,
+            category: nextCategory,
+          });
         }
 
         const currentCategoryLabel = composerMode === "edit"
@@ -1546,7 +1895,13 @@
           renderChild(TopBar, {
             isLoggedIn,
             searchQuery,
-            onSearchChange: setSearchQuery,
+            onSearchChange: (nextQuery) => {
+              appendDebugLog("ACTION", "검색어 변경", {
+                from: searchQuery,
+                to: nextQuery,
+              });
+              setSearchQuery(nextQuery);
+            },
             onToggleLogin: toggleLogin,
           }),
           !isLoggedIn
@@ -1561,7 +1916,13 @@
                   categories,
                   counts: categoryCounts,
                   selectedCategory,
-                  onSelectCategory: setSelectedCategory,
+                  onSelectCategory: (nextCategory) => {
+                    appendDebugLog("ACTION", "카테고리 변경", {
+                      from: selectedCategory,
+                      to: nextCategory,
+                    });
+                    setSelectedCategory(nextCategory);
+                  },
                   onOpenCreate: openCreate,
                   isLoggedIn,
                   onToggleLogin: toggleLogin,
@@ -1583,7 +1944,13 @@
                     isLoggedIn,
                     sortMode,
                     sortOptions: SORT_OPTIONS,
-                    onSortChange: setSortMode,
+                    onSortChange: (nextSortMode) => {
+                      appendDebugLog("ACTION", "정렬 변경", {
+                        from: sortMode,
+                        to: nextSortMode,
+                      });
+                      setSortMode(nextSortMode);
+                    },
                     onOpenCreate: openCreate,
                   }),
                   renderChild(PostList, {
@@ -1620,11 +1987,29 @@
           h("button", {
             type: "button",
             className: "debug-toggle",
-            onclick: () => setIsDebugPanelOpen((open) => !open),
+            onclick: () => {
+              appendDebugLog("ACTION", "디버그 패널 토글", {
+                nextOpen: !isDebugPanelOpen,
+              });
+              setIsDebugPanelOpen((open) => !open);
+            },
           }, [t(isDebugPanelOpen ? "디버그 닫기" : "디버그 열기")]),
           renderChild(DebugPanel, {
             open: isDebugPanelOpen,
             onToggle: () => setIsDebugPanelOpen((open) => !open),
+            isPaused: isDebugPaused,
+            autoScroll: isDebugAutoScroll,
+            typeOptions: DEBUG_TYPES,
+            typeFilter: debugTypeFilter,
+            searchQuery: debugSearchQuery,
+            activeTab: debugTab,
+            logs: filteredDebugLogs,
+            onTypeFilterChange: setDebugTypeFilter,
+            onSearchQueryChange: setDebugSearchQuery,
+            onAutoScrollChange: setIsDebugAutoScroll,
+            onTogglePause: () => setIsDebugPaused((paused) => !paused),
+            onClear: () => setDebugLogs([]),
+            onTabChange: setDebugTab,
             debugText: JSON.stringify(debugSnapshot, null, 2),
           }),
         ]));
