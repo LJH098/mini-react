@@ -108,8 +108,8 @@ function isDeepEqual(a, b) {
 
   const aProps = a.props ?? {};
   const bProps = b.props ?? {};
-  const aKeys = Object.keys(aProps);
-  const bKeys = Object.keys(bProps);
+  const aKeys = Object.keys(aProps).filter((key) => key !== "key");
+  const bKeys = Object.keys(bProps).filter((key) => key !== "key");
 
   if (aKeys.length !== bKeys.length) {
     return false;
@@ -128,8 +128,8 @@ function isDeepEqual(a, b) {
     return false;
   }
 
-  for (let i = 0; i < aChildren.length; i += 1) {
-    if (!isDeepEqual(aChildren[i], bChildren[i])) {
+  for (let index = 0; index < aChildren.length; index += 1) {
+    if (!isDeepEqual(aChildren[index], bChildren[index])) {
       return false;
     }
   }
@@ -142,19 +142,19 @@ function tryFindRemoved(oldChildren, newChildren) {
     return -1;
   }
 
-  let k = 0;
+  let pivot = 0;
 
-  while (k < newChildren.length && isDeepEqual(oldChildren[k], newChildren[k])) {
-    k += 1;
+  while (pivot < newChildren.length && isDeepEqual(oldChildren[pivot], newChildren[pivot])) {
+    pivot += 1;
   }
 
-  for (let i = k; i < newChildren.length; i += 1) {
-    if (!isDeepEqual(oldChildren[i + 1], newChildren[i])) {
+  for (let index = pivot; index < newChildren.length; index += 1) {
+    if (!isDeepEqual(oldChildren[index + 1], newChildren[index])) {
       return -1;
     }
   }
 
-  return k;
+  return pivot;
 }
 
 function tryFindAdded(oldChildren, newChildren) {
@@ -162,46 +162,181 @@ function tryFindAdded(oldChildren, newChildren) {
     return -1;
   }
 
-  let k = 0;
+  let pivot = 0;
 
-  while (k < oldChildren.length && isDeepEqual(oldChildren[k], newChildren[k])) {
-    k += 1;
+  while (pivot < oldChildren.length && isDeepEqual(oldChildren[pivot], newChildren[pivot])) {
+    pivot += 1;
   }
 
-  for (let i = k; i < oldChildren.length; i += 1) {
-    if (!isDeepEqual(oldChildren[i], newChildren[i + 1])) {
+  for (let index = pivot; index < oldChildren.length; index += 1) {
+    if (!isDeepEqual(oldChildren[index], newChildren[index + 1])) {
       return -1;
     }
   }
 
-  return k;
+  return pivot;
 }
 
 function diffChildren(oldChildren, newChildren, path, patches) {
+  assertUniqueKeys(oldChildren);
+  assertUniqueKeys(newChildren);
+
+  const oldMode = getChildListMode(oldChildren);
+  const newMode = getChildListMode(newChildren);
+
+  if (oldMode === "keyed" && newMode === "keyed") {
+    diffKeyedChildren(oldChildren, newChildren, path, patches);
+    return;
+  }
+
+  // Mixing keyed and unkeyed siblings is ambiguous, so we keep the old index-based behavior.
+  diffChildrenByIndex(oldChildren, newChildren, path, patches);
+}
+
+function diffChildrenByIndex(oldChildren, newChildren, path, patches) {
   const removedIndex = tryFindRemoved(oldChildren, newChildren);
 
   if (removedIndex !== -1) {
-    patches.push({ type: PatchType.REMOVE, path: [...path, removedIndex] });
+    patches.push({
+      type: PatchType.REMOVE,
+      path: [...path, removedIndex],
+    });
     return;
   }
 
   const addedIndex = tryFindAdded(oldChildren, newChildren);
 
   if (addedIndex !== -1) {
-    patches.push({ type: PatchType.ADD, path: [...path, addedIndex], node: newChildren[addedIndex] });
+    patches.push({
+      type: PatchType.ADD,
+      path: [...path, addedIndex],
+      node: newChildren[addedIndex],
+    });
     return;
   }
 
   const maxLength = Math.max(oldChildren.length, newChildren.length);
 
   for (let index = 0; index < maxLength; index += 1) {
-    walk(
-      oldChildren[index],
-      newChildren[index],
-      [...path, index],
-      patches,
-    );
+    walk(oldChildren[index], newChildren[index], [...path, index], patches);
   }
+}
+
+function diffKeyedChildren(oldChildren, newChildren, path, patches) {
+  const oldChildrenByKey = mapChildrenByKey(oldChildren);
+  const newChildrenByKey = mapChildrenByKey(newChildren);
+  const workingKeys = oldChildren.map((child) => getNodeKey(child));
+
+  for (let oldIndex = oldChildren.length - 1; oldIndex >= 0; oldIndex -= 1) {
+    const oldKey = getNodeKey(oldChildren[oldIndex]);
+
+    if (!newChildrenByKey.has(oldKey)) {
+      patches.push({
+        type: PatchType.REMOVE,
+        path: [...path, oldIndex],
+      });
+      workingKeys.splice(oldIndex, 1);
+    }
+  }
+
+  for (let newIndex = 0; newIndex < newChildren.length; newIndex += 1) {
+    const newKey = getNodeKey(newChildren[newIndex]);
+
+    if (workingKeys[newIndex] === newKey) {
+      continue;
+    }
+
+    const currentIndex = workingKeys.indexOf(newKey);
+
+    if (currentIndex === -1) {
+      patches.push({
+        type: PatchType.ADD,
+        path: [...path, newIndex],
+        node: newChildren[newIndex],
+      });
+      workingKeys.splice(newIndex, 0, newKey);
+      continue;
+    }
+
+    patches.push({
+      type: PatchType.MOVE,
+      path,
+      fromIndex: currentIndex,
+      toIndex: newIndex,
+    });
+    moveItem(workingKeys, currentIndex, newIndex);
+  }
+
+  for (let newIndex = 0; newIndex < newChildren.length; newIndex += 1) {
+    const newChild = newChildren[newIndex];
+    const oldChild = oldChildrenByKey.get(getNodeKey(newChild));
+
+    if (!oldChild) {
+      continue;
+    }
+
+    walk(oldChild, newChild, [...path, newIndex], patches);
+  }
+}
+
+function assertUniqueKeys(children) {
+  const seenKeys = new Map();
+
+  for (const child of children) {
+    const key = getNodeKey(child);
+
+    if (key === undefined) {
+      continue;
+    }
+
+    if (seenKeys.has(key)) {
+      throw new Error(`Duplicate key "${String(key)}" among siblings.`);
+    }
+
+    seenKeys.set(key, true);
+  }
+}
+
+function getChildListMode(children) {
+  if (children.length === 0) {
+    return "unkeyed";
+  }
+
+  const keyedChildrenCount = children.filter((child) => getNodeKey(child) !== undefined).length;
+
+  if (keyedChildrenCount === 0) {
+    return "unkeyed";
+  }
+
+  if (keyedChildrenCount === children.length) {
+    return "keyed";
+  }
+
+  return "mixed";
+}
+
+function mapChildrenByKey(children) {
+  const childrenByKey = new Map();
+
+  for (const child of children) {
+    childrenByKey.set(getNodeKey(child), child);
+  }
+
+  return childrenByKey;
+}
+
+function getNodeKey(node) {
+  if (node?.nodeType !== NodeType.ELEMENT) {
+    return undefined;
+  }
+
+  const key = node.props?.key;
+  return key === undefined || key === null ? undefined : key;
+}
+
+function moveItem(list, fromIndex, toIndex) {
+  const [item] = list.splice(fromIndex, 1);
+  list.splice(toIndex, 0, item);
 }
 
 function diffProps(oldProps = {}, newProps = {}) {
@@ -209,7 +344,7 @@ function diffProps(oldProps = {}, newProps = {}) {
   const keys = new Set([...Object.keys(oldProps), ...Object.keys(newProps)]);
 
   for (const key of keys) {
-    if (oldProps[key] === newProps[key]) {
+    if (key === "key" || oldProps[key] === newProps[key]) {
       continue;
     }
 

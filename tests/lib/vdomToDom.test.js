@@ -67,6 +67,20 @@ describe("vdomToDom", () => {
     expect(domNode.childNodes).toHaveLength(2);
   });
 
+  it("reconciliation용 key prop은 실제 DOM attribute로 렌더링하지 않는다", () => {
+    const vnode = elementNode("button", {
+      key: "save-button",
+      id: "save",
+    }, [
+      textNode("Save"),
+    ]);
+
+    const domNode = vdomToDom(vnode);
+
+    expect(domNode.getAttribute("id")).toBe("save");
+    expect(domNode.hasAttribute("key")).toBe(false);
+  });
+
   it("잘못된 vnode 입력이면 일관된 TypeError를 던진다", () => {
     expect(() => vdomToDom({})).toThrowError(new TypeError("Invalid vnode."));
   });
