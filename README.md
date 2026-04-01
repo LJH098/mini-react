@@ -1,6 +1,6 @@
 # mini-react
 
-기존 Virtual DOM 엔진 위에 key 기반 child reconciliation과 루트 전용 mini React runtime을 얹은 과제 프로젝트입니다.
+기존 Virtual DOM 엔진 위에 루트 전용 mini React runtime을 얹어 component, state, hook 흐름을 학습하는 과제 프로젝트입니다.
 
 ## 구성
 
@@ -23,12 +23,12 @@
 
 ## 핵심 포인트
 
-- 기존 VDOM + Diff + Patch 구조를 유지합니다.
-- child diff는 `props.key`를 사용하는 keyed reconciliation을 지원합니다.
-- keyed reorder에서는 `PatchType.MOVE`로 기존 DOM node identity를 유지합니다.
-- `key`는 reconciliation metadata만 담당하고 실제 DOM attribute로 렌더링되지 않습니다.
-- hooks와 state는 루트 컴포넌트에서만 지원합니다.
-- 자식 컴포넌트는 props만 받는 stateless plain function입니다.
+- 기존 VDOM + Diff + Patch 구조 위에 루트 컴포넌트 실행 모델을 추가했습니다.
+- 루트 컴포넌트는 `FunctionComponent`로 감싸며 `(props, helpers) => vnode` 형태로 렌더링합니다.
+- 상태는 루트 컴포넌트에서 `useState`로 관리하고, 상태가 바뀌면 전체 화면이 다시 계산됩니다.
+- `useMemo`로 목록 필터링, 정렬, 통계 같은 파생 데이터를 캐싱합니다.
+- `useEffect`는 렌더 이후 실행되며 localStorage 저장, document title 변경 같은 부수 효과를 처리합니다.
+- 자식 컴포넌트는 props만 받는 stateless plain function이며 `renderChild`로 조합합니다.
 
 ## Runtime API
 
@@ -88,7 +88,7 @@ app.unmount();
   - 이번 주 과제 메인 데모입니다.
   - mini-react로 만든 네이버 카페형 커뮤니티 서비스 화면입니다.
   - 로그인/로그아웃, 글쓰기, 수정, 좋아요, 검색, 카테고리 필터, 정렬을 보여줍니다.
-  - 게시글 목록은 `post.id` key로 렌더링되고, 인기순 정렬에서 좋아요 변화가 reorder로 이어집니다.
+  - 하나의 루트 컴포넌트에서 state를 관리하고, 자식 컴포넌트에는 props를 내려주는 구조를 보여줍니다.
 - `/history-demo.html`
   - 기존 Week 4 Diff / History 데모입니다.
   - 편집 가능한 DOM 비교, patch 적용, history 이동을 그대로 확인할 수 있습니다.
@@ -119,7 +119,7 @@ npm test
 - 로그아웃 상태에서는 소개 화면과 인기글 미리보기만 보입니다.
 - 로그인하면 게시판 레이아웃이 열리고 글쓰기와 수정 버튼이 나타납니다.
 - 좋아요 버튼은 로그인 상태에서만 활성화되며, 누를 때마다 좋아요 수가 바로 반영됩니다.
-- `인기순` 정렬에서 좋아요를 누르면 게시글 순서가 바뀌면서 keyed diff가 자연스럽게 동작합니다.
+- 글 작성이나 좋아요 이후에는 목록, 상세 패널, 통계가 같은 루트 state를 기준으로 함께 갱신됩니다.
 - 게시글과 로그인 상태는 `localStorage`에 저장되어 새로고침 뒤에도 유지됩니다.
 
 ## 실제 React와의 차이점
