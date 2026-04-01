@@ -2,7 +2,7 @@ import { applyPatches } from "./lib/applyPatches.js";
 import { diff } from "./lib/diff.js";
 import { renderTo } from "./lib/renderTo.js";
 
-let activeRuntime = null;
+let activeComponent = null;
 
 export class FunctionComponent {
   constructor(renderFn) {
@@ -11,10 +11,202 @@ export class FunctionComponent {
     }
 
     this.renderFn = renderFn;
+    this.helpers = {
+      renderChild: (childFn, props = {}) => this.renderChild(childFn, props),
+    };
+    this.resetRuntimeState();
   }
 
-  render(props) {
-    return this.renderFn(props);
+  resetRuntimeState() {
+    this.hooks = [];
+    this.hookIndex = 0;
+    this.pendingEffects = [];
+    this.container = null;
+    this.rootProps = {};
+    this.currentVdom = null;
+    this.rootDom = null;
+    this.hookCount = null;
+    this.isRendering = false;
+    this.isFlushingEffects = false;
+    this.needsRerender = false;
+    this.isMounted = false;
+    this.isUnmounted = false;
+    this.renderScope = null;
+  }
+
+  render(props = this.rootProps, helpers = this.helpers) {
+    return this.renderFn(props, helpers);
+  }
+
+  mount(container, initialProps = {}) {
+    if (!container || typeof container.replaceChildren !== "function") {
+      throw new TypeError("FunctionComponent.mount requires a valid container.");
+    }
+
+    if (this.isMounted && !this.isUnmounted) {
+      throw new Error("FunctionComponent is already mounted.");
+    }
+
+    this.resetRuntimeState();
+    this.container = container;
+    this.rootProps = initialProps;
+    this.isMounted = true;
+    this.isUnmounted = false;
+    this.update(initialProps);
+    return this.rootDom;
+  }
+
+  update(nextProps = this.rootProps) {
+    if (this.isUnmounted) {
+      return this.rootDom;
+    }
+
+    if (!this.isMounted || !this.container) {
+      throw new Error("FunctionComponent must be mounted before update.");
+    }
+
+    this.rootProps = nextProps;
+
+    if (this.isRendering || this.isFlushingEffects) {
+      this.needsRerender = true;
+      return this.rootDom;
+    }
+
+    do {
+      this.needsRerender = false;
+
+      const nextVdom = this.renderRoot();
+
+      if (this.currentVdom == null) {
+        renderTo(this.container, nextVdom);
+        this.rootDom = this.container.firstChild ?? null;
+      } else {
+        this.rootDom = applyPatches(this.rootDom, diff(this.currentVdom, nextVdom));
+      }
+
+      this.currentVdom = nextVdom;
+      this.flushEffects();
+    } while (this.needsRerender);
+
+    return this.rootDom;
+  }
+
+  unmount() {
+    if (!this.isMounted || this.isUnmounted) {
+      return;
+    }
+
+    this.cleanupEffectSlots();
+
+    if (this.currentVdom != null && this.rootDom != null) {
+      this.rootDom = applyPatches(this.rootDom, diff(this.currentVdom, null));
+    }
+
+    this.container?.replaceChildren();
+
+    if (activeComponent === this) {
+      activeComponent = null;
+    }
+
+    this.container = null;
+    this.rootProps = {};
+    this.currentVdom = null;
+    this.rootDom = null;
+    this.hooks = [];
+    this.hookIndex = 0;
+    this.hookCount = null;
+    this.pendingEffects = [];
+    this.isMounted = false;
+    this.isUnmounted = true;
+    this.isRendering = false;
+    this.isFlushingEffects = false;
+    this.needsRerender = false;
+    this.renderScope = null;
+  }
+
+  renderChild(childFn, props = {}) {
+    if (typeof childFn !== "function") {
+      throw new TypeError("renderChild requires a plain function child.");
+    }
+
+    if (activeComponent !== this || !this.isRendering || this.renderScope == null) {
+      throw new Error("renderChild must be called during the root render.");
+    }
+
+    // Child components stay props-only in this mini runtime.
+    // This boundary lets hooks reject child scope without adding child instances or a bigger runtime.
+    const previousScope = this.renderScope;
+    this.renderScope = "child";
+
+    try {
+      return childFn(props);
+    } finally {
+      this.renderScope = previousScope;
+    }
+  }
+
+  renderRoot() {
+    this.pendingEffects = [];
+    // hookIndex resets every render so hook call #1, #2, #3... line back up with the same slots.
+    this.hookIndex = 0;
+    this.isRendering = true;
+    this.renderScope = "root";
+    activeComponent = this;
+
+    try {
+      const nextVdom = this.render(this.rootProps, this.helpers);
+
+      if (nextVdom == null) {
+        throw new TypeError("Root component must return a vnode.");
+      }
+
+      if (this.hookCount !== null && this.hookCount !== this.hookIndex) {
+        throw new Error("Hook order changed between renders.");
+      }
+
+      this.hookCount = this.hookIndex;
+      return nextVdom;
+    } finally {
+      activeComponent = null;
+      this.renderScope = null;
+      this.isRendering = false;
+    }
+  }
+
+  flushEffects() {
+    const effects = this.pendingEffects;
+    this.pendingEffects = [];
+
+    if (effects.length === 0) {
+      return;
+    }
+
+    this.isFlushingEffects = true;
+
+    try {
+      for (const { slotIndex, effect, deps } of effects) {
+        const slot = this.hooks[slotIndex];
+
+        if (typeof slot.cleanup === "function") {
+          slot.cleanup();
+        }
+
+        const cleanup = effect();
+        slot.cleanup = typeof cleanup === "function" ? cleanup : undefined;
+        slot.deps = cloneDeps(deps);
+      }
+    } finally {
+      this.isFlushingEffects = false;
+    }
+  }
+
+  cleanupEffectSlots() {
+    for (const slot of this.hooks) {
+      if (slot?.kind === "effect" && typeof slot.cleanup === "function") {
+        slot.cleanup();
+        slot.cleanup = undefined;
+      }
+    }
   }
 }
 
@@ -27,58 +219,26 @@ export function mountRoot(container, rootComponent, initialProps = {}) {
     throw new TypeError("mountRoot requires a FunctionComponent root.");
   }
 
-  const runtime = {
-    container,
-    rootComponent,
-    rootProps: initialProps,
-    currentVdom: null,
-    rootDom: null,
-    hookSlots: [],
-    hookIndex: 0,
-    pendingEffects: [],
-    hookCount: null,
-    isRendering: false,
-    isFlushingEffects: false,
-    needsRerender: false,
-    isUnmounted: false,
-  };
-
-  rerenderRuntime(runtime);
+  rootComponent.mount(container, initialProps);
 
   return {
     rerender() {
-      rerenderRuntime(runtime);
+      rootComponent.update();
     },
     setProps(nextProps = {}) {
-      runtime.rootProps = nextProps;
-      rerenderRuntime(runtime);
+      rootComponent.update(nextProps);
     },
     unmount() {
-      if (runtime.isUnmounted) {
-        return;
-      }
-
-      cleanupEffectSlots(runtime);
-
-      if (runtime.currentVdom != null && runtime.rootDom != null) {
-        runtime.rootDom = applyPatches(runtime.rootDom, diff(runtime.currentVdom, null));
-      }
-
-      container.replaceChildren();
-      runtime.currentVdom = null;
-      runtime.rootDom = null;
-      runtime.hookSlots = [];
-      runtime.hookCount = null;
-      runtime.pendingEffects = [];
-      runtime.isUnmounted = true;
+      rootComponent.unmount();
     },
   };
 }
 
 export function useState(initialValue) {
-  const runtime = getActiveRuntime("useState");
-  const slotIndex = runtime.hookIndex;
-  let slot = runtime.hookSlots[slotIndex];
+  const component = getActiveComponent("useState");
+  assertRootHookScope(component);
+  const slotIndex = component.hookIndex;
+  let slot = component.hooks[slotIndex];
 
   if (!slot) {
     const value = typeof initialValue === "function" ? initialValue() : initialValue;
@@ -86,8 +246,8 @@ export function useState(initialValue) {
     slot = {
       kind: "state",
       value,
-      // Hook state persists here, outside the function body, so the next render can reuse it.
-      setState(nextValue) {
+      // Hook state persists in the component's hooks array, outside the render function body.
+      setState: (nextValue) => {
         const previousValue = slot.value;
         const resolvedValue = typeof nextValue === "function"
           ? nextValue(previousValue)
@@ -99,24 +259,26 @@ export function useState(initialValue) {
 
         slot.value = resolvedValue;
 
-        // setState updates the stored slot value first, then reruns the root through diff + patch.
-        rerenderRuntime(runtime);
+        // setState does more than store a value: it triggers component.update()
+        // so the root reruns through VDOM diff + patch and the screen stays in sync.
+        component.update();
         return resolvedValue;
       },
     };
-    runtime.hookSlots[slotIndex] = slot;
+    component.hooks[slotIndex] = slot;
   } else {
     assertHookKind(slot, "state");
   }
 
-  runtime.hookIndex += 1;
+  component.hookIndex += 1;
   return [slot.value, slot.setState];
 }
 
 export function useMemo(factory, deps) {
-  const runtime = getActiveRuntime("useMemo");
-  const slotIndex = runtime.hookIndex;
-  let slot = runtime.hookSlots[slotIndex];
+  const component = getActiveComponent("useMemo");
+  assertRootHookScope(component);
+  const slotIndex = component.hookIndex;
+  let slot = component.hooks[slotIndex];
 
   if (!slot) {
     slot = {
@@ -124,7 +286,7 @@ export function useMemo(factory, deps) {
       value: factory(),
       deps: cloneDeps(deps),
     };
-    runtime.hookSlots[slotIndex] = slot;
+    component.hooks[slotIndex] = slot;
   } else {
     assertHookKind(slot, "memo");
 
@@ -134,14 +296,15 @@ export function useMemo(factory, deps) {
     }
   }
 
-  runtime.hookIndex += 1;
+  component.hookIndex += 1;
   return slot.value;
 }
 
 export function useEffect(effect, deps) {
-  const runtime = getActiveRuntime("useEffect");
-  const slotIndex = runtime.hookIndex;
-  let slot = runtime.hookSlots[slotIndex];
+  const component = getActiveComponent("useEffect");
+  assertRootHookScope(component);
+  const slotIndex = component.hookIndex;
+  let slot = component.hooks[slotIndex];
 
   if (!slot) {
     slot = {
@@ -149,118 +312,35 @@ export function useEffect(effect, deps) {
       deps: undefined,
       cleanup: undefined,
     };
-    runtime.hookSlots[slotIndex] = slot;
+    component.hooks[slotIndex] = slot;
   } else {
     assertHookKind(slot, "effect");
   }
 
   if (deps === undefined || !areHookDepsEqual(slot.deps, deps)) {
-    runtime.pendingEffects.push({
+    component.pendingEffects.push({
       slotIndex,
       effect,
       deps,
     });
   }
 
-  runtime.hookIndex += 1;
+  component.hookIndex += 1;
 }
 
-function rerenderRuntime(runtime) {
-  if (runtime.isUnmounted) {
-    return;
-  }
-
-  if (runtime.isRendering || runtime.isFlushingEffects) {
-    runtime.needsRerender = true;
-    return;
-  }
-
-  do {
-    runtime.needsRerender = false;
-
-    const nextVdom = renderRoot(runtime);
-
-    if (runtime.currentVdom == null) {
-      renderTo(runtime.container, nextVdom);
-      runtime.rootDom = runtime.container.firstChild ?? null;
-    } else {
-      runtime.rootDom = applyPatches(runtime.rootDom, diff(runtime.currentVdom, nextVdom));
-    }
-
-    runtime.currentVdom = nextVdom;
-    flushEffects(runtime);
-  } while (runtime.needsRerender);
-}
-
-function renderRoot(runtime) {
-  runtime.pendingEffects = [];
-  // hookIndex resets every render so the root function reads its hook slots in the same order.
-  runtime.hookIndex = 0;
-  runtime.isRendering = true;
-  activeRuntime = runtime;
-
-  try {
-    const nextVdom = runtime.rootComponent.render(runtime.rootProps);
-
-    if (nextVdom == null) {
-      throw new TypeError("Root component must return a vnode.");
-    }
-
-    if (runtime.hookCount !== null && runtime.hookCount !== runtime.hookIndex) {
-      throw new Error("Hook order changed between renders.");
-    }
-
-    runtime.hookCount = runtime.hookIndex;
-    return nextVdom;
-  } finally {
-    activeRuntime = null;
-    runtime.isRendering = false;
-  }
-}
-
-function flushEffects(runtime) {
-  const effects = runtime.pendingEffects;
-  runtime.pendingEffects = [];
-
-  if (effects.length === 0) {
-    return;
-  }
-
-  runtime.isFlushingEffects = true;
-
-  try {
-    for (const { slotIndex, effect, deps } of effects) {
-      const slot = runtime.hookSlots[slotIndex];
-
-      if (typeof slot.cleanup === "function") {
-        slot.cleanup();
-      }
-
-      const cleanup = effect();
-
-      slot.cleanup = typeof cleanup === "function" ? cleanup : undefined;
-      slot.deps = cloneDeps(deps);
-    }
-  } finally {
-    runtime.isFlushingEffects = false;
-  }
-}
-
-function cleanupEffectSlots(runtime) {
-  for (const slot of runtime.hookSlots) {
-    if (slot?.kind === "effect" && typeof slot.cleanup === "function") {
-      slot.cleanup();
-      slot.cleanup = undefined;
-    }
-  }
-}
-
-function getActiveRuntime(hookName) {
-  if (!activeRuntime || activeRuntime.isUnmounted) {
+function getActiveComponent(hookName) {
+  if (!activeComponent || activeComponent.isUnmounted) {
     throw new Error(`${hookName} must be called during an active root render.`);
   }
 
-  return activeRuntime;
+  return activeComponent;
+}
+
+function assertRootHookScope(component) {
+  // This mini runtime keeps hooks on the root component only, so child renders stay stateless.
+  if (component.renderScope !== "root") {
+    throw new Error("Hooks can only be used in the root component.");
+  }
 }
 
 function assertHookKind(slot, expectedKind) {
