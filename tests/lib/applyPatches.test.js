@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { applyPatches } from "../../src/lib/applyPatches.js";
 import { diff } from "../../src/lib/diff.js";
-import { elementNode, textNode } from "../../src/constants.js";
+import { PatchType, elementNode, textNode } from "../../src/constants.js";
 
 describe("applyPatches", () => {
   it("applyPatches 함수가 export된다", () => {
@@ -82,6 +82,45 @@ describe("applyPatches", () => {
     expect(patchedRoot.textContent).toBe("after");
   });
 
+  it("MOVE 패치로 keyed reorder 시 기존 DOM node identity를 유지한다", () => {
+    const rootDom = document.createElement("ul");
+    const first = document.createElement("li");
+    const second = document.createElement("li");
+    const third = document.createElement("li");
+
+    first.textContent = "A";
+    second.textContent = "B";
+    third.textContent = "C";
+    rootDom.append(first, second, third);
+
+    const oldVdom = elementNode("ul", {}, [
+      elementNode("li", { key: "a" }, [textNode("A")]),
+      elementNode("li", { key: "b" }, [textNode("B")]),
+      elementNode("li", { key: "c" }, [textNode("C")]),
+    ]);
+    const newVdom = elementNode("ul", {}, [
+      elementNode("li", { key: "c" }, [textNode("C")]),
+      elementNode("li", { key: "a" }, [textNode("A")]),
+      elementNode("li", { key: "b" }, [textNode("B")]),
+    ]);
+
+    const patches = diff(oldVdom, newVdom);
+    const patchedRoot = applyPatches(rootDom, patches);
+
+    expect(patches).toEqual([
+      {
+        type: PatchType.MOVE,
+        path: [],
+        fromIndex: 2,
+        toIndex: 0,
+      },
+    ]);
+    expect(patchedRoot.childNodes[0]).toBe(third);
+    expect(patchedRoot.childNodes[1]).toBe(first);
+    expect(patchedRoot.childNodes[2]).toBe(second);
+    expect(patchedRoot.outerHTML).toBe("<ul><li>C</li><li>A</li><li>B</li></ul>");
+  });
+
   it("잘못된 patch 입력이면 일관된 TypeError를 던진다", () => {
     const rootDom = document.createElement("div");
 
@@ -93,6 +132,9 @@ describe("applyPatches", () => {
     ).toThrowError(new TypeError("Invalid patch."));
     expect(() =>
       applyPatches(rootDom, [{ type: "TEXT", path: ["nope"], value: "x" }]),
+    ).toThrowError(new TypeError("Invalid patch."));
+    expect(() =>
+      applyPatches(rootDom, [{ type: PatchType.MOVE, path: [], fromIndex: -1, toIndex: 0 }]),
     ).toThrowError(new TypeError("Invalid patch."));
   });
 });
