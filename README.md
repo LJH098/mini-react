@@ -20,6 +20,7 @@
 - `useState`
 - `useEffect`
 - `useMemo`
+- `useRef`
 
 ## 핵심 포인트
 
@@ -74,6 +75,10 @@ app.unmount();
 - `useMemo`
   - `{ value, deps }`를 캐시합니다.
   - deps는 `Object.is` 기반 shallow compare를 사용합니다.
+- `useRef`
+  - `{ current }` 객체를 반환합니다.
+  - 같은 훅 슬롯에서는 같은 ref 객체를 유지합니다.
+  - `ref.current` 변경만으로는 rerender되지 않습니다.
 - `useEffect`
   - commit 이후 실행됩니다.
   - deps 변경 시 이전 cleanup을 먼저 실행합니다.

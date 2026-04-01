@@ -300,6 +300,26 @@ export function useMemo(factory, deps) {
   return slot.value;
 }
 
+export function useRef(initialValue) {
+  const component = getActiveComponent("useRef");
+  assertRootHookScope(component);
+  const slotIndex = component.hookIndex;
+  let slot = component.hooks[slotIndex];
+
+  if (!slot) {
+    slot = {
+      kind: "ref",
+      ref: { current: initialValue },
+    };
+    component.hooks[slotIndex] = slot;
+  } else {
+    assertHookKind(slot, "ref");
+  }
+
+  component.hookIndex += 1;
+  return slot.ref;
+}
+
 export function useEffect(effect, deps) {
   const component = getActiveComponent("useEffect");
   assertRootHookScope(component);

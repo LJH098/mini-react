@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from "vitest";
-import { FunctionComponent, mountRoot, useEffect, useMemo, useState } from "../src/rootRuntime.js";
+import {
+  FunctionComponent,
+  mountRoot,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "../src/rootRuntime.js";
 import { elementNode, textNode } from "../src/constants.js";
 
 function CounterLabel(props) {
@@ -116,6 +123,44 @@ describe("root runtime", () => {
 
     expect(computeCount).toBe(2);
     expect(container.textContent).toBe("count=2, doubled=4");
+  });
+
+  it("useRef는 같은 객체를 유지하고 current 변경이 리렌더를 유발하지 않는다", () => {
+    const container = document.createElement("div");
+    let forceRender;
+    let firstRef;
+    let lastRef;
+    let renderCount = 0;
+
+    const Root = new FunctionComponent(() => {
+      const [count, setCount] = useState(0);
+      const ref = useRef("init");
+      forceRender = setCount;
+      renderCount += 1;
+
+      if (!firstRef) {
+        firstRef = ref;
+      }
+      lastRef = ref;
+
+      return elementNode("section", {}, [
+        textNode(`count=${count}, ref=${String(ref.current)}`),
+      ]);
+    });
+
+    Root.mount(container);
+    expect(renderCount).toBe(1);
+    expect(firstRef).toBe(lastRef);
+    expect(container.textContent).toBe("count=0, ref=init");
+
+    firstRef.current = "changed";
+    expect(renderCount).toBe(1);
+    expect(container.textContent).toBe("count=0, ref=init");
+
+    forceRender((prev) => prev + 1);
+    expect(renderCount).toBe(2);
+    expect(firstRef).toBe(lastRef);
+    expect(container.textContent).toBe("count=1, ref=changed");
   });
 
   it("useEffect는 commit 뒤에 실행되고 deps 변경 시 cleanup 후 새 effect를 실행한다", () => {
