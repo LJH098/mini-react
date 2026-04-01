@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary": "#ffffff",
+              "surface": "#f9f9f7",
+              "on-primary-container": "#9bc0ab",
+              "on-primary-fixed": "#002114",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e8e8e6",
+              "on-secondary-container": "#5a664f",
+              "on-secondary-fixed": "#141e0d",
+              "on-surface": "#1a1c1b",
+              "surface-container": "#eeeeec",
+              "on-error": "#ffffff",
+              "primary-fixed": "#c6ebd5",
+              "on-primary-fixed-variant": "#2c4d3d",
+              "error": "#ba1a1a",
+              "surface-tint": "#446554",
+              "inverse-surface": "#2f3130",
+              "on-tertiary-fixed": "#151d1a",
+              "on-error-container": "#93000a",
+              "tertiary": "#2a3430",
+              "on-tertiary-fixed-variant": "#3f4945",
+              "on-tertiary": "#ffffff",
+              "primary": "#173829",
+              "surface-variant": "#e2e3e1",
+              "inverse-on-surface": "#f1f1ef",
+              "outline": "#727973",
+              "on-primary": "#ffffff",
+              "on-surface-variant": "#414844",
+              "tertiary-fixed-dim": "#bfc9c3",
+              "background": "#f9f9f7",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f9f9f7",
+              "on-tertiary-container": "#afb9b4",
+              "secondary-container": "#d7e4c7",
+              "outline-variant": "#c1c8c2",
+              "tertiary-fixed": "#dbe5df",
+              "surface-container-low": "#f4f4f2",
+              "inverse-primary": "#aacfba",
+              "primary-container": "#2e4f3f",
+              "secondary-fixed-dim": "#becbaf",
+              "secondary": "#56624b",
+              "surface-container-highest": "#e2e3e1",
+              "secondary-fixed": "#dae7ca",
+              "on-secondary-fixed-variant": "#3f4a35",
+              "surface-dim": "#dadad8",
+              "on-background": "#1a1c1b",
+              "tertiary-container": "#414a46",
+              "primary-fixed-dim": "#aacfba"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Newsreader', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0px 20px 40px rgba(23, 56, 41, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<header class="bg-[#f9f9f7]/80 dark:bg-stone-950/80 backdrop-blur-xl text-[#173829] docked full-width top-0 z-50 sticky">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1440px] mx-auto">
+<div class="text-2xl font-serif italic text-[#173829] dark:text-stone-100">Verdant Folio</div>
+<div class="flex items-center gap-8">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-stone-500 hover:text-[#173829] transition-colors font-label tracking-[0.05em] text-sm" href="#">HOME</a>
+<a class="text-[#173829] font-bold border-b-2 border-[#173829] font-label tracking-[0.05em] text-sm" href="#">COMMUNITY</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors font-label tracking-[0.05em] text-sm" href="#">CATALOGUE</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#173829] cursor-pointer hover:bg-stone-100 p-2 rounded-full transition-all">account_circle</span>
+</div>
+</div>
+</div>
+</header>
+<div class="flex max-w-[1440px] mx-auto min-h-screen">
+<aside class="bg-[#f4f4f2] dark:bg-stone-900 text-[#173829] h-screen w-64 fixed left-0 top-0 pt-20 flex flex-col gap-6 px-6 py-8 hidden lg:flex">
+<div class="mb-4">
+<div class="text-lg font-serif text-[#173829] dark:text-stone-100">Cafe Information</div>
+<div class="text-xs font-label text-stone-500 tracking-wider">Established 2024</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 flex items-center gap-3 px-3 py-2 rounded-md transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span class="font-label text-sm tracking-wide">Notice</span>
+</a>
+<a class="text-[#173829] font-semibold bg-white/50 dark:bg-stone-800/50 flex items-center gap-3 px-3 py-2 rounded-md transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-label text-sm tracking-wide">General</span>
+</a>
+<a class="text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 flex items-center gap-3 px-3 py-2 rounded-md transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="quiz">quiz</span>
+<span class="font-label text-sm tracking-wide">Q&amp;A</span>
+</a>
+<a class="text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 flex items-center gap-3 px-3 py-2 rounded-md transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+<span class="font-label text-sm tracking-wide">Photo</span>
+</a>
+<a class="text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 flex items-center gap-3 px-3 py-2 rounded-md transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-label text-sm tracking-wide">Gallery</span>
+</a>
+</nav>
+<button class="mt-4 bg-primary text-on-primary py-3 px-4 rounded-lg font-label tracking-wider text-xs hover:bg-primary-container transition-all">
+                Write Post
+            </button>
+</aside>
+<main class="flex-1 lg:ml-64 bg-surface px-6 md:px-12 py-8">
+<div class="max-w-4xl mx-auto">
+<nav class="mb-8 flex items-center text-xs font-label tracking-widest text-stone-500 uppercase">
+<a class="hover:text-primary" href="#">General</a>
+<span class="mx-2">/</span>
+<span class="text-on-surface">Post Details</span>
+</nav>
+<div class="relative mb-12">
+<img alt="Interior of a botanical-filled community cafe" class="w-full h-[500px] object-cover rounded-xl editorial-shadow" data-alt="Interior of a modern botanical cafe with hanging ferns, wooden tables, soft natural light streaming through large windows and a peaceful morning atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOdUIICQ-infiTF9MGWcxKUjQ33P5TVUyoRBkZMMu09xSOMZ_WRh7pe8Fxby4zmZpGx8lJqIEH2uXPftrp3p-9ctQYpgHTJ8YgmDnO9v1-VZJfW-6oUbSXatN2SPoqIRBVKagbU63QP41yX62etk1wyvU54Mxx0pr4XhF6A1UEnfckZDRrtVG3QQQV9FItMmwTr9BjDHmAJISRHRn-cXuqkGBQB1gcR4L-VSxPqqNuiC2SJHOQnmcXKTf1ARe45ngGzh-kVoxgST5i"/>
+<div class="mt-8">
+<h1 class="text-5xl md:text-7xl font-serif text-primary leading-tight mb-6">Sustainable Brewing: The Art of the Slow Pour at Verdant</h1>
+</div>
+</div>
+<div class="flex flex-col md:flex-row md:items-center justify-between py-8 mb-8 border-y border-outline-variant/15">
+<div class="flex items-center gap-4">
+<img alt="Portrait of the author" class="w-14 h-14 rounded-full object-cover" data-alt="Close up portrait of a smiling woman with glasses and a green linen shirt in a bright airy studio setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAQTZ9s6uWmBDsVi50D-zNIkIj38dXJr4w9-ikBfBrQARSJcNnY26pU64av042P4Zs_fEcIeDDWCyBQcVhl3EVLJus1rpVQy-nrB4YAaYlLjcLSs72PjVAp_bT_UWs05IqpDwjpDGK4URVFZj9jXj4s8ygxgjIzEDYjc-VFTnggMPoHD_11pvRiiq71x9FLcYQaLmaE1dGbnl3qKVaWS6FXIFA2V2JuFUky64KItyYS8AZ7xx3vl6USQSv9MFFsDPKnsGNN5caMBfI"/>
+<div>
+<p class="font-headline text-xl text-primary">Elena Moss</p>
+<p class="text-xs font-label text-stone-500 tracking-wider">MARCH 14, 2024 • 6 MIN READ</p>
+</div>
+</div>
+<div class="flex gap-3 mt-6 md:mt-0">
+<button class="flex items-center gap-2 px-5 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg font-label text-xs tracking-wider hover:bg-secondary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span> LIKE
+                        </button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-surface-container-high text-on-surface-variant rounded-lg font-label text-xs tracking-wider hover:bg-secondary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="share">share</span> SHARE
+                        </button>
+</div>
+</div>
+<article class="prose prose-stone max-w-none mb-16">
+<p class="text-xl font-body text-on-surface-variant leading-relaxed mb-8 italic">
+                        In the heart of the Digital Conservatory, we believe that coffee is more than just a morning ritual. It is a botanical dialogue between the earth, the bean, and the quiet moments we steal for ourselves.
+                    </p>
+<div class="text-lg font-body text-on-surface-variant space-y-6 leading-relaxed">
+<p>
+                            Today we dive deep into our sourcing philosophy. Every bean served at the Verdant Folio Cafe is tracked from its altitude-rich origins in Ethiopia to our locally-restored vintage roasting machine. We don't just prioritize flavor; we prioritize the biological integrity of the environment that produced it.
+                        </p>
+<p>
+                            When you order a pour-over here, you’ll notice the deliberate pace. We use Japanese ceramic drippers that encourage a specific flow rate, allowing the water to extract only the brightest notes of jasmine and stone fruit without the bitterness of a rushed brew.
+                        </p>
+<div class="bg-surface-container-low p-8 my-10 rounded-lg italic text-primary-container border-l-4 border-primary">
+                            "The slow pour is a form of meditation. In a world of instant gratification, we choose the three-minute extraction as a rebellion."
+                        </div>
+<p>
+                            Our new seasonal blend, 'Moss &amp; Morning,' features a heavy body with a clean, tea-like finish. It's best enjoyed while sitting near our south-facing windows, where the light filters through the Monstera leaves. We invite you to join us this weekend for a tasting workshop where we'll explore how different water temperatures can drastically shift the personality of a single-origin bean.
+                        </p>
+</div>
+</article>
+<section class="mt-20 pt-12 border-t border-outline-variant/15">
+<h3 class="text-3xl font-serif text-primary mb-10">Community Reflections</h3>
+<div class="space-y-10 mb-12">
+<div class="flex gap-6">
+<div class="w-12 h-12 shrink-0 bg-secondary-fixed rounded-full flex items-center justify-center font-serif text-secondary text-lg">J</div>
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="font-headline text-lg text-primary">Julian Thorne</span>
+<span class="text-[10px] font-label text-stone-400 tracking-widest">2 HOURS AGO</span>
+</div>
+<p class="text-on-surface-variant leading-relaxed">The 'Moss &amp; Morning' blend is truly exceptional. I spent an hour reading by the window yesterday and the flavor profile changed so beautifully as the coffee cooled.</p>
+<button class="mt-3 text-xs font-label text-stone-500 hover:text-primary flex items-center gap-1 uppercase tracking-tighter">
+                                    Reply <span class="material-symbols-outlined text-sm">reply</span>
+</button>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="w-12 h-12 shrink-0 bg-tertiary-fixed rounded-full flex items-center justify-center font-serif text-tertiary text-lg">S</div>
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="font-headline text-lg text-primary">Sarah Chen</span>
+<span class="text-[10px] font-label text-stone-400 tracking-widest">5 HOURS AGO</span>
+</div>
+<p class="text-on-surface-variant leading-relaxed">I'd love to attend the workshop! Is it necessary to bring our own equipment or will everything be provided? Looking forward to learning about water temp impact.</p>
+<button class="mt-3 text-xs font-label text-stone-500 hover:text-primary flex items-center gap-1 uppercase tracking-tighter">
+                                    Reply <span class="material-symbols-outlined text-sm">reply</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-lg editorial-shadow">
+<h4 class="font-label text-xs tracking-widest text-stone-500 mb-4 uppercase">Leave a reflection</h4>
+<textarea class="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface-variant placeholder-stone-400 min-h-[120px] transition-colors resize-none py-2" placeholder="Write your thoughts here..."></textarea>
+<div class="flex justify-end mt-6">
+<button class="px-8 py-3 bg-primary text-on-primary rounded-lg font-label text-xs tracking-widest hover:bg-primary-container transition-all uppercase">Post Reflection</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<footer class="w-full py-12 mt-auto bg-[#f4f4f2] dark:bg-stone-950 text-[#173829]">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-[1440px] mx-auto">
+<div class="flex flex-col gap-2 mb-6 md:mb-0">
+<span class="text-sm font-label text-stone-500 tracking-wider">© 2024 Verdant Folio. All rights reserved.</span>
+</div>
+<div class="flex gap-8">
+<a class="text-stone-500 text-sm font-label tracking-wide hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-stone-500 text-sm font-label tracking-wide hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-stone-500 text-sm font-label tracking-wide hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Contact Us</a>
+</div>
+</div>
+</footer>
+</body></html>

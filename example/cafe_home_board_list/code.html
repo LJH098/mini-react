@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary": "#ffffff",
+              "surface": "#f9f9f7",
+              "on-primary-container": "#9bc0ab",
+              "on-primary-fixed": "#002114",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e8e8e6",
+              "on-secondary-container": "#5a664f",
+              "on-secondary-fixed": "#141e0d",
+              "on-surface": "#1a1c1b",
+              "surface-container": "#eeeeec",
+              "on-error": "#ffffff",
+              "primary-fixed": "#c6ebd5",
+              "on-primary-fixed-variant": "#2c4d3d",
+              "error": "#ba1a1a",
+              "surface-tint": "#446554",
+              "inverse-surface": "#2f3130",
+              "on-tertiary-fixed": "#151d1a",
+              "on-error-container": "#93000a",
+              "tertiary": "#2a3430",
+              "on-tertiary-fixed-variant": "#3f4945",
+              "on-tertiary": "#ffffff",
+              "primary": "#173829",
+              "surface-variant": "#e2e3e1",
+              "inverse-on-surface": "#f1f1ef",
+              "outline": "#727973",
+              "on-primary": "#ffffff",
+              "on-surface-variant": "#414844",
+              "tertiary-fixed-dim": "#bfc9c3",
+              "background": "#f9f9f7",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f9f9f7",
+              "on-tertiary-container": "#afb9b4",
+              "secondary-container": "#d7e4c7",
+              "outline-variant": "#c1c8c2",
+              "tertiary-fixed": "#dbe5df",
+              "surface-container-low": "#f4f4f2",
+              "inverse-primary": "#aacfba",
+              "primary-container": "#2e4f3f",
+              "secondary-fixed-dim": "#becbaf",
+              "secondary": "#56624b",
+              "surface-container-highest": "#e2e3e1",
+              "secondary-fixed": "#dae7ca",
+              "on-secondary-fixed-variant": "#3f4a35",
+              "surface-dim": "#dadad8",
+              "on-background": "#1a1c1b",
+              "tertiary-container": "#414a46",
+              "primary-fixed-dim": "#aacfba"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0px 20px 40px rgba(23, 56, 41, 0.06);
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #f9f9f7;
+            color: #1a1c1b;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<nav class="bg-[#f9f9f7]/80 backdrop-blur-xl text-[#173829] docked full-width top-0 z-50 sticky">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1440px] mx-auto">
+<div class="text-2xl font-serif italic text-[#173829]">Verdant Folio</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#173829] font-bold border-b-2 border-[#173829] font-label uppercase tracking-[0.05em] text-sm" href="#">Community</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors font-label uppercase tracking-[0.05em] text-sm" href="#">Journal</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors font-label uppercase tracking-[0.05em] text-sm" href="#">Shop</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors font-label uppercase tracking-[0.05em] text-sm" href="#">Archives</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-lg">search</span>
+<input class="bg-surface-container-low border-none focus:ring-1 focus:ring-primary/20 rounded-lg pl-10 pr-4 py-2 text-sm w-64 transition-all" placeholder="Search the conservatory..." type="text"/>
+</div>
+<button class="hover:bg-stone-100 transition-all duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<div class="flex max-w-[1440px] mx-auto min-h-screen">
+<aside class="hidden lg:flex flex-col gap-6 px-6 py-8 bg-[#f4f4f2] h-screen w-64 fixed left-0 top-0 pt-24">
+<div class="mb-4">
+<h2 class="text-lg font-serif text-[#173829]">Cafe Information</h2>
+<p class="text-xs font-label text-stone-500 uppercase tracking-[0.05em]">Established 2024</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="campaign">campaign</span>
+<span class="font-label text-sm uppercase tracking-[0.05em]">Notice</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#173829] font-semibold bg-white/50 rounded-md group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="chat">chat</span>
+<span class="font-label text-sm uppercase tracking-[0.05em]">General</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="quiz">quiz</span>
+<span class="font-label text-sm uppercase tracking-[0.05em]">Q&amp;A</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="image">image</span>
+<span class="font-label text-sm uppercase tracking-[0.05em]">Photo</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="grid_view">grid_view</span>
+<span class="font-label text-sm uppercase tracking-[0.05em]">Gallery</span>
+</a>
+</nav>
+<button class="mt-4 bg-primary text-on-primary py-3 rounded-md font-label uppercase tracking-[0.05em] text-sm hover:opacity-90 active:scale-95 transition-all">
+                Write Post
+            </button>
+</aside>
+<main class="flex-1 lg:ml-64 px-6 md:px-12 py-8">
+<section class="mb-12 relative overflow-hidden rounded-xl h-[400px] flex items-end">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Lush green botanical interior of a modern greenhouse cafe with hanging ferns and soft sunlight filtering through glass panels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGDH-rQ2lNOO7wrJERHuNw7x_3LN60fbOa19PvWfcjakky1sGLn-EEi7AXg5SAxm0fCokqnBa1mnoQ47devSVCJbIKedXqafsZyqgqHkG7nHRovIhrb2j00qrAd91uooEj1F8RpongP3p4uJdakt6J1wIpnrlnS0tHus_Wo2qFQUbi-vBupuhophY3hEyrGIKkez35KH-3ZBJz9tWK7cfI-N-V5zQ0xWhDXeupdIzhXoYX9db3pIY8qx0zeRWlUyJaJtOlfaSjs2V_"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+<div class="relative p-8 md:p-12 w-full max-w-2xl">
+<span class="inline-block bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-label uppercase tracking-[0.1em] mb-4">Featured Story</span>
+<h1 class="text-4xl md:text-5xl font-headline text-white mb-4 leading-tight italic">The Art of Cultivating Silent Spaces in a Busy World</h1>
+<p class="text-stone-200 font-body text-lg mb-6 line-clamp-2">How our local community garden became a sanctuary for weary urbanites seeking a moment of botanical reflection.</p>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white/20">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young woman with a warm smile in natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmBVbK1de5mkfSOmvWNdL4HDkvL7jvb6LWqMPatRBFZgFjP7uaMqODCuh0DxvEASQOhSpnRFZYUiMw49Bjm3wD6Ek4YWTyQyCWi6lP67q26cZsIl6IIQhaOFCQUC2_NJrGELWC_A5xJ6CqBPegkQ6LGLPrD-YOmjPJy5QDTnLqytx24AJ0hJ8uzj13lwzm0Q5yvcLWyCWbxzrl0W7jsqqdd909TYLL9DGTOOvap0nCebbzHqz7f4rnT1cF91-AKzlXpPtWbsWIN34z"/>
+</div>
+<div>
+<p class="text-white text-sm font-label uppercase tracking-wider">Elena Thorne</p>
+<p class="text-stone-300 text-xs">Garden Curator • 5 min read</p>
+</div>
+</div>
+</div>
+</section>
+<div class="flex justify-between items-baseline mb-8">
+<h2 class="text-3xl font-headline text-primary italic">Community Postings</h2>
+<div class="flex gap-4">
+<button class="text-xs font-label uppercase tracking-widest text-primary font-bold border-b-2 border-primary pb-1">Latest</button>
+<button class="text-xs font-label uppercase tracking-widest text-stone-400 hover:text-primary pb-1 transition-colors">Trending</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<article class="bg-surface-container-lowest editorial-shadow p-6 group cursor-pointer border border-outline-variant/15 hover:border-outline-variant/50 transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-label uppercase tracking-[0.1em] text-secondary">General Discussion</span>
+<span class="text-xs text-stone-400 font-label">2 hours ago</span>
+</div>
+<h3 class="text-xl font-headline text-primary mb-3 leading-snug group-hover:italic transition-all">Propagating Monstera Deliciosa: A Beginner's Journey and Lessons Learned</h3>
+<p class="text-stone-600 text-sm mb-6 line-clamp-3">After three failed attempts, I finally saw the first water roots appearing. Here is exactly what I changed in my routine...</p>
+<div class="flex items-center justify-between border-t border-surface-container pt-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed-dim"></div>
+<span class="text-xs font-label text-stone-700">Julian Moss</span>
+</div>
+<div class="flex items-center gap-4 text-stone-400">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">favorite</span>
+<span class="text-[10px]">124</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">visibility</span>
+<span class="text-[10px]">1.2k</span>
+</div>
+</div>
+</div>
+</article>
+<article class="bg-surface-container-lowest editorial-shadow p-6 group cursor-pointer border border-outline-variant/15 hover:border-outline-variant/50 transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-label uppercase tracking-[0.1em] text-secondary">Q&amp;A</span>
+<span class="text-xs text-stone-400 font-label">5 hours ago</span>
+</div>
+<h3 class="text-xl font-headline text-primary mb-3 leading-snug group-hover:italic transition-all">Identify this fern? Found near the base of an old oak in the North Park.</h3>
+<p class="text-stone-600 text-sm mb-6 line-clamp-3">It has these beautiful silvery fronds that seem to glow at dusk. I've looked through three field guides and can't find a match.</p>
+<div class="flex items-center justify-between border-t border-surface-container pt-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-fixed-dim"></div>
+<span class="text-xs font-label text-stone-700">Flora Explorer</span>
+</div>
+<div class="flex items-center gap-4 text-stone-400">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">favorite</span>
+<span class="text-[10px]">42</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">visibility</span>
+<span class="text-[10px]">456</span>
+</div>
+</div>
+</div>
+</article>
+<article class="md:col-span-2 flex flex-col md:flex-row bg-surface-container-low rounded-lg overflow-hidden border border-outline-variant/15 hover:border-outline-variant/30 transition-all">
+<div class="w-full md:w-1/3 h-48 md:h-auto">
+<img class="w-full h-full object-cover" data-alt="A lush organic vegetable garden with neat rows of plants and soft afternoon shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPVEfEBwtlcBrbgdnkPSO0YXWcyaNigQOqOlS-l1e_hRqPLRrwncvvYl6aQggsS9TtrGQdb4ZpqOSORs-oBQ5bkW9m1UqaGq3ZkyBaPEVd3q5WiAsyv0zy5guLyODg_P5U4SOavu10MvP9J-J6j0YIc5UV-LqduVq3d9_3aJ8f9zZCMhjeCDH17LLyzRmOzNzN4drEvcTPLv2StloYanRoFZq33A-YvJ-TS0i0_cv7SzS7rfbDtubMnCUf35AqlCJUGeqn8PvvB9jn"/>
+</div>
+<div class="p-8 flex-1">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-label uppercase tracking-[0.1em] text-primary font-bold">Gallery Highlight</span>
+<span class="text-xs text-stone-400 font-label">Yesterday</span>
+</div>
+<h3 class="text-2xl font-headline text-primary mb-3 italic">Winter Harvesting: What’s still growing in Zone 7?</h3>
+<p class="text-stone-600 mb-6">Surprising results from our community greenhouse experiments. We've managed to keep the kale and winter spinach flourishing despite the frost.</p>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a middle-aged man in a denim shirt outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6YZRQqxjWVsx5M446bBFU-dIQehVeN2OzM96YCiKtQlgIc2R51irrXD3hWp4dQwGrS857Ig-6i490IwPttmDJSwu5tE94NWOLLl2OmAXDW6OIGBOylcqCCrDvvflA1RJCYsqVbIOoYGrcQyuk7WOEebYxYiLOH_B0BbbV5u5QviF9wTQTMwrMe5rWpH8ULjz_PxBepHhwWWRyzdX1guRw0UoK-10iVPJkemZcrdTBylpogGa1buIQQwgaQrFCTSvsY1V1vK25X7jv"/>
+</div>
+<span class="text-xs font-label text-stone-700">Oliver Green</span>
+</div>
+<div class="flex gap-4">
+<button class="px-4 py-2 bg-white text-primary text-xs font-label uppercase tracking-widest hover:bg-stone-100 transition-colors">View Photo Essay</button>
+</div>
+</div>
+</div>
+</article>
+<article class="bg-surface-container-lowest editorial-shadow p-6 group cursor-pointer border border-outline-variant/15 hover:border-outline-variant/50 transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-label uppercase tracking-[0.1em] text-secondary">Community Cafe</span>
+<span class="text-xs text-stone-400 font-label">1 day ago</span>
+</div>
+<h3 class="text-xl font-headline text-primary mb-3 leading-snug group-hover:italic transition-all">New Monthly Blend: The Evergreen Roast is here.</h3>
+<p class="text-stone-600 text-sm mb-6 line-clamp-3">Notes of pine, cedar, and dark chocolate. Come try a cup and tell us what you think of this month's botanical inspiration.</p>
+<div class="flex items-center justify-between border-t border-surface-container pt-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-tertiary-fixed-dim"></div>
+<span class="text-xs font-label text-stone-700">Barista Sam</span>
+</div>
+<div class="flex items-center gap-4 text-stone-400">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">favorite</span>
+<span class="text-[10px]">89</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">visibility</span>
+<span class="text-[10px]">2.1k</span>
+</div>
+</div>
+</div>
+</article>
+<article class="bg-surface-container-lowest editorial-shadow p-6 group cursor-pointer border border-outline-variant/15 hover:border-outline-variant/50 transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-label uppercase tracking-[0.1em] text-secondary">General Discussion</span>
+<span class="text-xs text-stone-400 font-label">2 days ago</span>
+</div>
+<h3 class="text-xl font-headline text-primary mb-3 leading-snug group-hover:italic transition-all">Book Review: 'The Hidden Life of Trees'</h3>
+<p class="text-stone-600 text-sm mb-6 line-clamp-3">A profound look into the social network of forests. This completely changed how I look at the park across the street.</p>
+<div class="flex items-center justify-between border-t border-surface-container pt-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary-container"></div>
+<span class="text-xs font-label text-stone-700">Sarah Reed</span>
+</div>
+<div class="flex items-center gap-4 text-stone-400">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">favorite</span>
+<span class="text-[10px]">156</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">visibility</span>
+<span class="text-[10px]">3.4k</span>
+</div>
+</div>
+</div>
+</article>
+</div>
+<div class="mt-16 flex justify-center">
+<nav class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center text-stone-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-primary font-bold border-b-2 border-primary">1</button>
+<button class="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-primary transition-colors">2</button>
+<button class="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-primary transition-colors">3</button>
+<span class="px-2 text-stone-300">...</span>
+<button class="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-primary transition-colors">12</button>
+<button class="w-10 h-10 flex items-center justify-center text-stone-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</nav>
+</div>
+</main>
+</div>
+<footer class="w-full py-12 mt-24 bg-[#f4f4f2] text-[#173829]">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-[1440px] mx-auto">
+<p class="text-stone-500 text-sm mb-4 md:mb-0">© 2024 Verdant Folio. All rights reserved.</p>
+<div class="flex gap-8">
+<a class="text-stone-500 text-sm hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-stone-500 text-sm hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-stone-500 text-sm hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Contact Us</a>
+</div>
+</div>
+</footer>
+</body></html>

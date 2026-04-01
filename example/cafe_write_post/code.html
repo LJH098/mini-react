@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verdant Folio | Create Post</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary": "#ffffff",
+              "surface": "#f9f9f7",
+              "on-primary-container": "#9bc0ab",
+              "on-primary-fixed": "#002114",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e8e8e6",
+              "on-secondary-container": "#5a664f",
+              "on-secondary-fixed": "#141e0d",
+              "on-surface": "#1a1c1b",
+              "surface-container": "#eeeeec",
+              "on-error": "#ffffff",
+              "primary-fixed": "#c6ebd5",
+              "on-primary-fixed-variant": "#2c4d3d",
+              "error": "#ba1a1a",
+              "surface-tint": "#446554",
+              "inverse-surface": "#2f3130",
+              "on-tertiary-fixed": "#151d1a",
+              "on-error-container": "#93000a",
+              "tertiary": "#2a3430",
+              "on-tertiary-fixed-variant": "#3f4945",
+              "on-tertiary": "#ffffff",
+              "primary": "#173829",
+              "surface-variant": "#e2e3e1",
+              "inverse-on-surface": "#f1f1ef",
+              "outline": "#727973",
+              "on-primary": "#ffffff",
+              "on-surface-variant": "#414844",
+              "tertiary-fixed-dim": "#bfc9c3",
+              "background": "#f9f9f7",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f9f9f7",
+              "on-tertiary-container": "#afb9b4",
+              "secondary-container": "#d7e4c7",
+              "outline-variant": "#c1c8c2",
+              "tertiary-fixed": "#dbe5df",
+              "surface-container-low": "#f4f4f2",
+              "inverse-primary": "#aacfba",
+              "primary-container": "#2e4f3f",
+              "secondary-fixed-dim": "#becbaf",
+              "secondary": "#56624b",
+              "surface-container-highest": "#e2e3e1",
+              "secondary-fixed": "#dae7ca",
+              "on-secondary-fixed-variant": "#3f4a35",
+              "surface-dim": "#dadad8",
+              "on-background": "#1a1c1b",
+              "tertiary-container": "#414a46",
+              "primary-fixed-dim": "#aacfba"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Newsreader', serif; }
+        .label-style { font-family: 'Manrope', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-[#f9f9f7]/80 dark:bg-stone-950/80 backdrop-blur-xl sticky top-0 z-50 transition-all">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1440px] mx-auto">
+<div class="text-2xl font-serif italic text-[#173829] dark:text-stone-100">Verdant Folio</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-stone-500 hover:text-[#173829] transition-colors label-style" href="#">Notice</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors label-style" href="#">General</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors label-style" href="#">Q&amp;A</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors label-style" href="#">Photo</a>
+<a class="text-stone-500 hover:text-[#173829] transition-colors label-style" href="#">Gallery</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container px-3 py-1.5 rounded-lg">
+<span class="material-symbols-outlined text-stone-400 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-40 placeholder-stone-400" placeholder="Search entries..." type="text"/>
+</div>
+<button class="hover:bg-stone-100 dark:hover:bg-stone-800 p-2 rounded-full transition-all duration-300">
+<span class="material-symbols-outlined text-[#173829] dark:text-[#2E4F3F]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex flex-1 max-w-[1440px] mx-auto w-full relative">
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden lg:flex flex-col gap-6 px-6 py-8 h-[calc(100vh-80px)] w-64 fixed left-0 top-20 bg-[#f4f4f2] dark:bg-stone-900 overflow-y-auto">
+<div class="mb-4">
+<h3 class="text-lg font-serif text-[#173829] dark:text-stone-100">Cafe Information</h3>
+<p class="text-xs text-stone-500">Established 2024</p>
+</div>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span class="label-style">Notice</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="label-style">General</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="quiz">quiz</span>
+<span class="label-style">Q&amp;A</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+<span class="label-style">Photo</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="label-style">Gallery</span>
+</a>
+</div>
+<div class="mt-8">
+<button class="w-full py-3 px-4 bg-[#173829] text-white label-style rounded-md shadow-sm hover:opacity-90 transition-opacity">
+                    Write Post
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-64 px-6 md:px-12 py-12 max-w-4xl mx-auto w-full">
+<div class="mb-10">
+<nav class="flex items-center gap-2 mb-6 text-stone-400 text-sm">
+<span class="label-style">Community</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="label-style text-[#173829]">Compose Story</span>
+</nav>
+<h1 class="text-5xl md:text-6xl font-headline text-primary mb-2 italic">New Cultivation</h1>
+<p class="text-stone-500 font-body">Capture your botanical thoughts and share them with the conservatory.</p>
+</div>
+<!-- Composer Interface -->
+<section class="bg-surface-container-lowest rounded-xl p-8 md:p-12 mb-12 shadow-sm border border-outline-variant/15">
+<!-- Writing Interface -->
+<div class="space-y-8">
+<!-- Title Input -->
+<div class="group">
+<input class="w-full text-4xl md:text-5xl font-headline bg-transparent border-none focus:ring-0 placeholder-stone-300 p-0 text-primary italic leading-tight" placeholder="Title of your entry..." type="text"/>
+<div class="h-[1px] w-full bg-outline-variant/30 mt-4 group-focus-within:bg-primary transition-colors"></div>
+</div>
+<!-- Meta Settings Bar -->
+<div class="flex flex-wrap gap-4 py-4 border-y border-outline-variant/10">
+<div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-stone-500 text-sm">folder_open</span>
+<select class="bg-transparent border-none focus:ring-0 text-xs label-style py-0 pr-8">
+<option>Notice</option>
+<option selected="">General</option>
+<option>Q&amp;A</option>
+<option>Gallery</option>
+</select>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-stone-500 text-sm">visibility</span>
+<select class="bg-transparent border-none focus:ring-0 text-xs label-style py-0 pr-8">
+<option>Public</option>
+<option>Private</option>
+<option>Followers Only</option>
+</select>
+</div>
+</div>
+<!-- Editor Tools -->
+<div class="flex items-center gap-4 pb-2 text-stone-400 overflow-x-auto">
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">format_bold</span></button>
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">format_italic</span></button>
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">format_quote</span></button>
+<div class="w-[1px] h-4 bg-outline-variant mx-2"></div>
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">link</span></button>
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">image</span></button>
+<button class="hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">code</span></button>
+</div>
+<!-- Content Area -->
+<div class="min-h-[400px]">
+<textarea class="w-full min-h-[400px] text-lg font-body bg-transparent border-none focus:ring-0 placeholder-stone-300 p-0 text-on-surface leading-relaxed resize-none" placeholder="Begin your botanical narrative..."></textarea>
+</div>
+<!-- Image Placeholder / Upload -->
+<div class="relative group cursor-pointer overflow-hidden rounded-xl bg-surface-container-low aspect-video flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 hover:border-primary/30 transition-all">
+<img alt="Subtle botanical background placeholder" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-105 transition-transform duration-700" data-alt="Moody dark green leaves with soft morning dew and cinematic lighting in a lush botanical garden atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1txUeXLhvTM2rkA_jj8o4KCfsjI4tfiJiyPPPLY4nlB48UNlJgu0Kj0WWqqnB3Ynk6tFC78Qa1nAGV0G-KGJW6wi7BYUdWRzz1j9cEeUxUpm3qavuilddAjII3i0-vNjhEG-wb5BdbQAmlFVzQRKJxJ9aUaRvVUJrvtERNqFgIJgNzwwYCQA0JMi_gj3FGxwYmrxr5h_Cjj93E8jkKGMr8hjClDxkDJyGX71qKRfzafM87SE_BNEDQw18U76iZZy6amtDbgfZ3nGW"/>
+<div class="relative z-10 flex flex-col items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-primary/40">add_photo_alternate</span>
+<span class="label-style text-primary/60">Upload Cover Image</span>
+<p class="text-xs text-stone-400">Recommended size: 1200x630px</p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="flex items-center justify-between mt-12 pt-8 border-t border-outline-variant/10">
+<button class="text-stone-500 hover:text-error transition-colors label-style flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">delete</span>
+                        Discard Draft
+                    </button>
+<div class="flex gap-4">
+<button class="px-6 py-3 text-primary bg-surface-container-high label-style rounded-md hover:opacity-80 transition-opacity">
+                            Save as Draft
+                        </button>
+<button class="px-8 py-3 bg-[#173829] text-white label-style rounded-md shadow-sm hover:opacity-90 transition-opacity flex items-center gap-2">
+                            Publish Entry
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Secondary Guidance Section (Editorial Card) -->
+<div class="grid md:grid-cols-2 gap-8">
+<div class="bg-[#f4f4f2] p-8 rounded-lg flex flex-col justify-between">
+<div>
+<h4 class="text-xl font-headline italic mb-4">Etiquette of the Conservatory</h4>
+<ul class="space-y-3 text-sm text-stone-600 font-body">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-xs mt-1">check_circle</span>
+                                Use high-quality botanical imagery.
+                            </li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-xs mt-1">check_circle</span>
+                                Categorize accurately for easier discovery.
+                            </li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-xs mt-1">check_circle</span>
+                                Maintain a tone of gentle curiosity.
+                            </li>
+</ul>
+</div>
+</div>
+<div class="relative rounded-lg overflow-hidden h-48 md:h-auto">
+<img alt="Botanical inspiration" class="w-full h-full object-cover" data-alt="Detailed macro shot of diverse green ferns and foliage with high contrast editorial lighting and deep forest tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPI9aHM_XW6p1SUSG6c2jSLAY2jm4KaUuQcfHNz-HzQOR8R18U1mEqsiZ1WMocSLb2ma7smaoSfyZGadNTXZKw5km7MuI30PM6XwDTrpesjq6AIUVVe6qKDUZQbkGKJMqI4fIV9QUtylV7LwWxht6Z134tXENT8aGJFGySCH6LIvifQA50bdrx5HkUhysoQmUifrTOT21sbAw8sRowAR8eaYOS-7U8P9jfYCH1HblT57yTZfC3cIxN_vGGxcMQg1yEhjSoC27bXmfE"/>
+<div class="absolute inset-0 bg-primary/20 backdrop-multiply"></div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-[#f4f4f2] dark:bg-stone-950 w-full py-12 mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-[1440px] mx-auto gap-8">
+<p class="text-stone-500 text-sm">© 2024 Verdant Folio. All rights reserved.</p>
+<div class="flex gap-8">
+<a class="text-stone-500 text-sm hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-stone-500 text-sm hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-stone-500 text-sm hover:text-[#2E4F3F] transition-colors opacity-80 hover:opacity-100" href="#">Contact Us</a>
+</div>
+</div>
+</footer>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-xl flex justify-around py-3 px-6 z-50 border-t border-outline-variant/10">
+<button class="flex flex-col items-center gap-1 text-stone-500">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] label-style">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#173829]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_square</span>
+<span class="text-[10px] label-style">Write</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-stone-500">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] label-style">Explore</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-stone-500">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] label-style">Profile</span>
+</button>
+</nav>
+</body></html>

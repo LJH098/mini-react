@@ -5,25 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mini-react demos</title>
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap");
       :root {
         color-scheme: light;
-        font-family: "Pretendard", "Noto Sans KR", sans-serif;
-        background: #f4f0ea;
-        color: #1f1a17;
+        --primary: #173829;
+        --primary-soft: #2e4f3f;
+        --secondary-chip: #d7e4c7;
+        --page-bg: #f9f9f7;
+        --surface-low: #f4f4f2;
+        --surface-card: #ffffff;
+        --ink: #1a1c1b;
+        --muted: #5f6661;
+        --outline-ghost: rgba(65, 72, 68, 0.08);
+        --ambient-shadow: 0 20px 40px rgba(23, 56, 41, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
         min-height: 100vh;
-        padding: 32px 20px 48px;
+        padding: 36px 20px 56px;
+        font-family: "Noto Sans KR", "Pretendard", sans-serif;
+        color: var(--ink);
+        word-break: keep-all;
+        overflow-wrap: break-word;
+        background: #eaf4ee;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -2;
         background:
-          radial-gradient(circle at top left, rgba(58, 103, 143, 0.12), transparent 28%),
-          radial-gradient(circle at bottom right, rgba(194, 123, 76, 0.14), transparent 32%),
-          linear-gradient(180deg, #faf7f2 0%, #ece2d5 100%);
+          radial-gradient(circle at 18% 14%, rgba(194, 222, 206, 0.45), transparent 36%),
+          radial-gradient(circle at 82% 80%, rgba(172, 204, 185, 0.4), transparent 34%),
+          linear-gradient(135deg, #edf8f1 0%, #dff0e5 48%, #d2e8dc 100%);
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background:
+          radial-gradient(circle at 14% 12%, rgba(199, 218, 189, 0.2), transparent 34%),
+          radial-gradient(circle at 82% 84%, rgba(130, 157, 139, 0.18), transparent 30%);
+      }
+
+      p,
+      li,
+      span,
+      strong,
+      h1,
+      h2,
+      h3,
+      h4,
+      button,
+      a {
+        word-break: keep-all;
+        overflow-wrap: break-word;
       }
 
       main {
-        max-width: 980px;
+        max-width: 1040px;
         margin: 0 auto;
         display: grid;
         gap: 20px;
@@ -31,11 +79,21 @@
 
       .hero,
       .card {
-        background: rgba(255, 252, 247, 0.92);
-        border: 1px solid rgba(47, 36, 26, 0.1);
-        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 0;
+        border-radius: 12px;
         padding: 24px;
-        box-shadow: 0 22px 44px rgba(47, 36, 26, 0.08);
+        box-shadow: 0 22px 44px rgba(23, 56, 41, 0.07);
+        backdrop-filter: blur(6px);
+      }
+
+      .hero {
+        display: grid;
+        gap: 12px;
+        background:
+          radial-gradient(circle at 16% 22%, rgba(255, 255, 255, 0.34), transparent 40%),
+          linear-gradient(118deg, rgba(88, 126, 105, 0.84), rgba(124, 160, 141, 0.78));
+        color: #f0f4ee;
       }
 
       .hero h1,
@@ -46,10 +104,25 @@
         margin: 0;
       }
 
-      .hero,
-      .card {
-        display: grid;
-        gap: 12px;
+      .hero h1,
+      .card h2 {
+        font-family: "Cinzel", "Noto Serif KR", serif;
+        color: var(--primary);
+      }
+
+      .hero h1 {
+        font-size: clamp(30px, 5vw, 46px);
+        line-height: 1.2;
+        font-weight: 600;
+      }
+
+      .hero .badge {
+        background: rgba(215, 228, 199, 0.95);
+      }
+
+      .hero h1,
+      .hero .muted {
+        color: #f2f4ef;
       }
 
       .cards {
@@ -58,41 +131,57 @@
         gap: 16px;
       }
 
+      .card {
+        display: grid;
+        gap: 12px;
+      }
+
       .badge {
         display: inline-flex;
         align-items: center;
         width: fit-content;
-        padding: 4px 10px;
+        padding: 5px 10px;
         border-radius: 999px;
-        background: rgba(47, 36, 26, 0.08);
-        font-size: 13px;
-        font-weight: 600;
+        background: var(--secondary-chip);
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
       }
 
-      a.button {
+      .muted {
+        color: var(--muted);
+      }
+
+      .button {
         width: fit-content;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         padding: 11px 16px;
-        border-radius: 999px;
-        background: #1f1a17;
-        color: #fff9f2;
+        border-radius: 6px;
+        background: linear-gradient(130deg, var(--primary), var(--primary-soft));
+        color: #fff;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
+      }
+
+      .button.alt {
+        background: var(--surface-low);
+        color: var(--ink);
       }
 
       ul {
+        margin: 0;
         padding-left: 20px;
+        color: var(--muted);
       }
 
-      code {
-        background: rgba(31, 26, 23, 0.06);
-        padding: 2px 6px;
-        border-radius: 999px;
+      li + li {
+        margin-top: 4px;
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 780px) {
         .cards {
           grid-template-columns: 1fr;
         }
@@ -104,9 +193,9 @@
       <section class="hero">
         <span class="badge">mini-react assignment hub</span>
         <h1>Virtual DOM 엔진 위에 루트 전용 Hooks runtime을 얹은 과제 결과물</h1>
-        <p>
-          아래에서 이번 주 과제용 Component / State / Hooks 데모와 지난 주 Diff / History 데모를
-          각각 바로 확인할 수 있습니다.
+        <p class="muted">
+          이번 주 과제용 Component / State / Hooks 데모와 지난 주 Diff / History 데모를
+          동일한 인터페이스 톤으로 빠르게 비교할 수 있습니다.
         </p>
       </section>
 
@@ -114,14 +203,14 @@
         <article class="card">
           <span class="badge">Week 5</span>
           <h2>커뮤니티 서비스 Demo</h2>
-          <p>
-            mini-react로 만든 네이버 카페형 게시판 서비스 데모입니다. 로그인/로그아웃, 글쓰기,
-            수정, 좋아요, 검색, 정렬이 모두 루트 상태와 hooks로 연결됩니다.
+          <p class="muted">
+            네이버 카페형 게시판을 mini-react로 구성한 화면입니다. 로그인/로그아웃, 글쓰기,
+            수정, 좋아요, 검색, 정렬을 하나의 루트 상태로 관리합니다.
           </p>
           <ul>
             <li>로그인 상태에서만 글쓰기, 수정, 좋아요 활성화</li>
-            <li>좋아요 수에 따라 인기순 목록이 자연스럽게 재정렬</li>
-            <li>mock 데이터와 localStorage로 실제 서비스처럼 시연</li>
+            <li>좋아요 변화에 따른 인기순 목록 재정렬</li>
+            <li>mock 데이터 + localStorage 기반 시연</li>
           </ul>
           <a class="button" href="/runtime-demo.html">Open Week 5 Demo</a>
         </article>
@@ -129,16 +218,16 @@
         <article class="card">
           <span class="badge">Week 4</span>
           <h2>Diff / History Demo</h2>
-          <p>
-            기존 Virtual DOM Diff &amp; Patch 데모를 별도 페이지로 분리했습니다. history 기반의
-            snapshot 이동과 patch 시각화를 그대로 확인할 수 있습니다.
+          <p class="muted">
+            Virtual DOM Diff &amp; Patch 과제를 분리한 페이지입니다. snapshot 이동과 patch
+            시각화를 그대로 확인할 수 있습니다.
           </p>
           <ul>
             <li>실제 DOM과 테스트 영역 비교</li>
             <li>Patch, Back, Forward 흐름 유지</li>
             <li>히스토리별 patch 상세 확인</li>
           </ul>
-          <a class="button" href="/history-demo.html">Open Week 4 Demo</a>
+          <a class="button alt" href="/history-demo.html">Open Week 4 Demo</a>
         </article>
       </section>
     </main>
