@@ -148,6 +148,7 @@ export function formatSnapshotComparison(previousVdom, currentVdom, patches) {
       case PatchType.TEXT:
       case PatchType.PROPS:
       case PatchType.REPLACE:
+      case PatchType.MOVE:
         leftAffectedPaths.push({ path, type: patch.type });
         rightAffectedPaths.push({ path, type: patch.type });
         break;
