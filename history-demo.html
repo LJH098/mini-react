@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual DOM Diff &amp; Patch Demo</title>
+    <style>
+      body {
+        margin: 24px;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
+        line-height: 1.5;
+        background: #f7f7f5;
+      }
+
+      h1,
+      h2 {
+        margin-top: 0;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .panel {
+        min-height: 220px;
+        padding: 16px;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      #test-area {
+        outline: none;
+      }
+
+      .history-section {
+        margin-top: 24px;
+      }
+
+      .history-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .history-list li {
+        margin-bottom: 8px;
+      }
+
+      .history-toggle {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        background: #fff;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .history-toggle.active {
+        border-color: #2e5cff;
+      }
+
+      .history-toggle.open {
+        background: #eef3ff;
+      }
+
+      .history-meta {
+        color: #666;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .history-panel {
+        margin-top: 8px;
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .patch-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .split-view {
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .split-head {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        background: #f3f4f6;
+        border-bottom: 1px solid #d0d0d0;
+      }
+
+      .split-head div {
+        padding: 10px 12px;
+        font-weight: 600;
+      }
+
+      .split-head div:first-child {
+        border-right: 1px solid #d0d0d0;
+      }
+
+      .split-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .split-body .code-block {
+        border-top: 0;
+        border-radius: 0;
+      }
+
+      .split-body .code-block:first-child {
+        border-right: 1px solid #d0d0d0;
+      }
+
+      .code-line.added {
+        background: #15391e;
+        color: #d9ffe3;
+      }
+
+      .code-line.removed {
+        background: #452021;
+        color: #ffd9db;
+      }
+
+      .patch-accordion {
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        background: #fafafa;
+      }
+
+      .patch-accordion[open] {
+        background: #fff;
+      }
+
+      .patch-summary {
+        padding: 10px 12px;
+        cursor: pointer;
+        font-family: "SFMono-Regular", "JetBrains Mono", monospace;
+        font-size: 13px;
+      }
+
+      .code-block {
+        margin: 0;
+        padding: 12px;
+        overflow: auto;
+        border-top: 1px solid #d0d0d0;
+        border-radius: 0 0 8px 8px;
+        background: #111827;
+        color: #f3f4f6;
+        font-family: "SFMono-Regular", "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .code-line {
+        display: block;
+        white-space: pre;
+      }
+
+      @media (max-width: 720px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+
+        .split-head,
+        .split-body {
+          grid-template-columns: 1fr;
+        }
+
+        .split-head div:first-child,
+        .split-body .code-block:first-child {
+          border-right: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Virtual DOM Diff &amp; Patch Demo</h1>
+
+    <div class="toolbar">
+      <button id="btn-patch">Patch</button>
+      <button id="btn-back" disabled>◀ 뒤로가기</button>
+      <button id="btn-forward" disabled>앞으로가기 ▶</button>
+    </div>
+
+    <div class="container">
+      <div class="panel-wrapper">
+        <h2>실제 영역 (읽기 전용)</h2>
+        <div class="panel" id="real-area"></div>
+      </div>
+      <div class="panel-wrapper">
+        <h2>테스트 영역 (편집 가능)</h2>
+        <div class="panel" id="test-area" contenteditable="true"></div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <h2>히스토리 스택</h2>
+      <ul class="history-list" id="history-list"></ul>
+    </div>
+
+    <script type="module">
+      import {
+        NodeType,
+        applyPatches,
+        diff,
+        domToVdom,
+        elementNode,
+        renderTo,
+        textNode,
+      } from "/src/lib.js";
+      import {
+        formatSnapshotComparison,
+        formatPatch,
+        formatPatchTitle,
+      } from "/src/ui-helper.js";
+      import { createHistory } from "/src/history.js";
+
+      const btnPatch = document.querySelector("#btn-patch");
+      const btnBack = document.querySelector("#btn-back");
+      const btnForward = document.querySelector("#btn-forward");
+      const realArea = document.querySelector("#real-area");
+      const testArea = document.querySelector("#test-area");
+      const historyList = document.querySelector("#history-list");
+      let openedHistoryIndex = null;
+
+      // 데모의 시작 화면을 실제 DOM 문자열이 아니라 vDOM 객체로 직접 만든다.
+      // elementNode / textNode를 조합해서 "초기 상태 스냅샷"을 구성한다.
+      const initialVdom = elementNode("div", {}, [
+        elementNode("h1", {}, [textNode("Hello")]),
+        elementNode("p", { style: "color: blue" }, [textNode("Virtual DOM Demo")]),
+        elementNode("ul", {}, [
+          elementNode("li", {}, [textNode("Item 1")]),
+          elementNode("li", {}, [textNode("Item 2")]),
+          elementNode("li", {}, [textNode("Item 3")]),
+        ]),
+      ]);
+
+      let history = createHistory(createSnapshot(initialVdom));
+
+      function normalizeText(value) {
+        return String(value ?? "").replace(/\s+/g, " ").trim();
+      }
+
+      function findTitleText(vnode) {
+        if (!vnode) {
+          return "";
+        }
+
+        if (vnode.nodeType === NodeType.TEXT) {
+          return normalizeText(vnode.value);
+        }
+
+        for (const child of vnode.children ?? []) {
+          const result = findTitleText(child);
+
+          if (result) {
+            return result;
+          }
+        }
+
+        return "";
+      }
+
+      // 히스토리에 넣는 단위는 "제목 + vDOM" 형태의 스냅샷이다.
+      // 실제 비교와 렌더링은 html 문자열이 아니라 이 vDOM 값을 기준으로 수행한다.
+      function createSnapshot(vdom) {
+        const title = findTitleText(vdom) || vdom?.type || "Snapshot";
+        return { title, vdom };
+      }
+
+      // 편집 가능한 영역은 contenteditable DOM이므로,
+      // 패널 안의 실제 루트 노드를 읽어서 vDOM 스냅샷으로 변환한다.
+      // contenteditable이 래퍼 div를 깨뜨릴 수 있으므로,
+      // div가 사라진 경우 모든 자식을 div로 다시 감싼다.
+      function readEditorSnapshot() {
+        const firstElement = Array.from(testArea.childNodes).find(
+          (node) => node.nodeType === Node.ELEMENT_NODE,
+        );
+
+        if (firstElement && firstElement.tagName.toLowerCase() === "div") {
+          return createSnapshot(domToVdom(firstElement));
+        }
+
+        const children = Array.from(testArea.childNodes)
+          .map((node) => domToVdom(node))
+          .filter((child) => child !== null);
+
+        return createSnapshot(elementNode("div", {}, children));
+      }
+
+      function renderSnapshotToEditor(snapshot) {
+        renderTo(testArea, snapshot.vdom);
+      }
+
+      function renderSnapshotToRealArea(snapshot) {
+        renderTo(realArea, snapshot.vdom);
+      }
+
+      function applySnapshotToRealArea(previousSnapshot, nextSnapshot) {
+        const currentRootDom = realArea.firstChild;
+
+        if (!currentRootDom) {
+          renderSnapshotToRealArea(nextSnapshot);
+          return;
+        }
+
+        const patches = diff(previousSnapshot.vdom, nextSnapshot.vdom);
+
+        if (patches.length === 0) {
+          return;
+        }
+
+        const nextRootDom = applyPatches(currentRootDom, patches);
+
+        if (nextRootDom === null) {
+          renderSnapshotToRealArea(nextSnapshot);
+        }
+      }
+
+      function createCodeBlock(lines) {
+        const pre = document.createElement("pre");
+        pre.className = "code-block";
+        lines.forEach(({ text, type }) => {
+          const row = document.createElement("span");
+          row.className = type ? `code-line ${type}` : "code-line";
+          row.textContent = text;
+          pre.append(row);
+        });
+
+        return pre;
+      }
+
+      function createRawCodeBlock(text) {
+        return createCodeBlock(
+          String(text).split("\n").map((line) => ({
+            text: line,
+            type: "",
+          })),
+        );
+      }
+
+      function getHistoryPatches(entries, index) {
+        if (index === 0) {
+          return [];
+        }
+
+        return diff(entries[index - 1].vdom, entries[index].vdom);
+      }
+
+      function renderHistory() {
+        const entries = history.entries();
+        const activeIndex = history.currentIndex();
+        const displayEntries = entries
+          .map((entry, index) => ({ entry, index }))
+          .filter(({ index }) => index > 0)
+          .reverse();
+
+        if (
+          openedHistoryIndex !== null &&
+          (openedHistoryIndex < 1 || !entries[openedHistoryIndex])
+        ) {
+          openedHistoryIndex = null;
+        }
+
+        historyList.innerHTML = "";
+
+        displayEntries.forEach(({ entry, index }, displayIndex) => {
+          const item = document.createElement("li");
+          const button = document.createElement("button");
+          const isOpen = openedHistoryIndex === index;
+
+          button.type = "button";
+          button.className = "history-toggle";
+          button.setAttribute("aria-expanded", String(isOpen));
+
+          if (index === activeIndex) {
+            button.classList.add("active");
+          }
+
+          if (isOpen) {
+            button.classList.add("open");
+          }
+
+          button.innerHTML = `
+            <span>${displayEntries.length - displayIndex}. ${entry.title}</span>
+            <span class="history-meta">${isOpen ? "닫기" : "열기"}</span>
+          `;
+          button.addEventListener("click", () => {
+            openedHistoryIndex = isOpen ? null : index;
+            renderHistory();
+          });
+
+          item.append(button);
+
+          if (isOpen) {
+            const panel = document.createElement("div");
+            panel.className = "history-panel";
+            const patches = getHistoryPatches(entries, index);
+            const { left, right } = formatSnapshotComparison(
+              index > 0 ? entries[index - 1].vdom : null,
+              entry.vdom,
+              patches,
+            );
+            const splitView = document.createElement("div");
+            splitView.className = "split-view";
+            splitView.innerHTML = `
+              <div class="split-head">
+                <div>이전 상태</div>
+                <div>현재 상태</div>
+              </div>
+            `;
+
+            const splitBody = document.createElement("div");
+            splitBody.className = "split-body";
+            splitBody.append(createCodeBlock(left), createCodeBlock(right));
+            splitView.append(splitBody);
+
+            panel.append(splitView);
+            const patchList = document.createElement("div");
+            patchList.className = "patch-list";
+
+            patches.forEach((patch, patchIndex) => {
+              const details = document.createElement("details");
+              details.className = "patch-accordion";
+
+              const summary = document.createElement("summary");
+              summary.className = "patch-summary";
+              summary.textContent = formatPatchTitle(patch, patchIndex);
+
+              details.append(summary, createRawCodeBlock(formatPatch(patch)));
+              patchList.append(details);
+            });
+
+            panel.append(patchList);
+            item.append(panel);
+          }
+
+          historyList.append(item);
+        });
+
+        btnBack.disabled = !history.canBack();
+        btnForward.disabled = !history.canForward();
+      }
+
+      function renderCurrent(updateEditor = true) {
+        const current = history.current();
+
+        renderSnapshotToRealArea(current);
+
+        if (updateEditor) {
+          renderSnapshotToEditor(current);
+        }
+
+        renderHistory();
+      }
+
+      btnPatch.addEventListener("click", () => {
+        const currentSnapshot = history.current();
+        const nextSnapshot = readEditorSnapshot();
+        const patches = diff(currentSnapshot.vdom, nextSnapshot.vdom);
+
+        if (patches.length === 0) {
+          renderHistory();
+          return;
+        }
+
+        applySnapshotToRealArea(currentSnapshot, nextSnapshot);
+        history.push(nextSnapshot);
+        renderSnapshotToEditor(nextSnapshot);
+        renderHistory();
+      });
+
+      btnBack.addEventListener("click", () => {
+        const currentSnapshot = history.current();
+        const previousSnapshot = history.back();
+
+        if (!previousSnapshot) {
+          return;
+        }
+
+        applySnapshotToRealArea(currentSnapshot, previousSnapshot);
+        renderSnapshotToEditor(previousSnapshot);
+        renderHistory();
+      });
+
+      btnForward.addEventListener("click", () => {
+        const currentSnapshot = history.current();
+        const nextSnapshot = history.forward();
+
+        if (!nextSnapshot) {
+          return;
+        }
+
+        applySnapshotToRealArea(currentSnapshot, nextSnapshot);
+        renderSnapshotToEditor(nextSnapshot);
+        renderHistory();
+      });
+
+      renderCurrent();
+    </script>
+  </body>
+</html>
