@@ -23,4 +23,5 @@ export const PatchType = Object.freeze({
   PROPS: "PROPS",
   ADD: "ADD",
   REMOVE: "REMOVE",
+  MOVE: "MOVE",
 });

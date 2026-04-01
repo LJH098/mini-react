@@ -61,6 +61,22 @@ function normalizePatch(patch) {
         path: [...patch.path],
         props: normalizeProps(patch.props),
       };
+    case PatchType.MOVE:
+      if (
+        !Number.isInteger(patch.fromIndex) ||
+        !Number.isInteger(patch.toIndex) ||
+        patch.fromIndex < 0 ||
+        patch.toIndex < 0
+      ) {
+        throw new TypeError("Invalid patch.");
+      }
+
+      return {
+        type: PatchType.MOVE,
+        path: [...patch.path],
+        fromIndex: patch.fromIndex,
+        toIndex: patch.toIndex,
+      };
     case PatchType.REMOVE:
       return {
         type: PatchType.REMOVE,
@@ -79,27 +95,54 @@ function isValidPath(path) {
 }
 
 function orderPatches(patches) {
-  const removals = patches
-    .filter((patch) => patch.type === PatchType.REMOVE)
-    .sort(compareRemovalPaths);
+  const structural = patches
+    .filter((patch) => isStructuralPatch(patch.type))
+    .sort(compareStructuralPatches);
   const updates = patches
-    .filter(
-      (patch) => patch.type !== PatchType.REMOVE && patch.type !== PatchType.ADD,
-    )
-    .sort((left, right) => comparePaths(left.path, right.path));
-  const additions = patches
-    .filter((patch) => patch.type === PatchType.ADD)
+    .filter((patch) => !isStructuralPatch(patch.type))
     .sort((left, right) => comparePaths(left.path, right.path));
 
-  return [...removals, ...updates, ...additions];
+  return [...structural, ...updates];
 }
 
-function compareRemovalPaths(left, right) {
-  if (left.path.length !== right.path.length) {
-    return right.path.length - left.path.length;
+function isStructuralPatch(type) {
+  return (
+    type === PatchType.REMOVE ||
+    type === PatchType.ADD ||
+    type === PatchType.MOVE
+  );
+}
+
+function compareStructuralPatches(left, right) {
+  const parentComparison = comparePaths(getParentPath(left), getParentPath(right));
+
+  if (parentComparison !== 0) {
+    return parentComparison;
   }
 
-  return comparePaths(right.path, left.path);
+  if (left.type === PatchType.REMOVE && right.type === PatchType.REMOVE) {
+    const leftIndex = left.path[left.path.length - 1] ?? -1;
+    const rightIndex = right.path[right.path.length - 1] ?? -1;
+    return rightIndex - leftIndex;
+  }
+
+  if (left.type === PatchType.REMOVE) {
+    return -1;
+  }
+
+  if (right.type === PatchType.REMOVE) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function getParentPath(patch) {
+  if (patch.type === PatchType.MOVE || patch.path.length === 0) {
+    return patch.path;
+  }
+
+  return patch.path.slice(0, -1);
 }
 
 function comparePaths(leftPath, rightPath) {
@@ -124,6 +167,8 @@ function applyPatch(rootDom, patch) {
       return applyPropsPatch(rootDom, patch);
     case PatchType.ADD:
       return applyAddPatch(rootDom, patch);
+    case PatchType.MOVE:
+      return applyMovePatch(rootDom, patch);
     case PatchType.REMOVE:
       return applyRemovePatch(rootDom, patch);
     default:
@@ -194,6 +239,29 @@ function applyAddPatch(rootDom, patch) {
   }
 
   parent.insertBefore(nextDom, parent.childNodes[childIndex] ?? null);
+  return rootDom;
+}
+
+function applyMovePatch(rootDom, patch) {
+  const parent = getNodeAtPath(rootDom, patch.path);
+
+  if (!parent || patch.fromIndex === patch.toIndex) {
+    return rootDom;
+  }
+
+  const target = parent.childNodes[patch.fromIndex];
+
+  if (!target) {
+    return rootDom;
+  }
+
+  // Moving the existing DOM node preserves identity, which is why keyed reorders need MOVE.
+  const referenceIndex = patch.fromIndex < patch.toIndex
+    ? patch.toIndex + 1
+    : patch.toIndex;
+  const referenceNode = parent.childNodes[referenceIndex] ?? null;
+
+  parent.insertBefore(target, referenceNode);
   return rootDom;
 }
 

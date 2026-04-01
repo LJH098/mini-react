@@ -1,4 +1,9 @@
 export function setDomProp(element, key, value) {
+  // `key` participates in reconciliation only, so it should never leak into the DOM.
+  if (key === "key") {
+    return;
+  }
+
   const normalizedKey = key === "class" ? "className" : key;
   const attributeName = normalizedKey === "className" ? "class" : normalizedKey;
 
@@ -31,6 +36,10 @@ export function setDomProp(element, key, value) {
 }
 
 export function removeDomProp(element, key) {
+  if (key === "key") {
+    return;
+  }
+
   const normalizedKey = key === "class" ? "className" : key;
   const attributeName = normalizedKey === "className" ? "class" : normalizedKey;
 
