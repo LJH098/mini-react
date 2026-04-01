@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini React Root Runtime Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "SF Mono", "IBM Plex Mono", monospace;
+        background: #f5efe2;
+        color: #1f1a17;
+      }
+
+      body {
+        margin: 0;
+        padding: 32px;
+        background:
+          radial-gradient(circle at top left, rgba(208, 119, 54, 0.18), transparent 32%),
+          linear-gradient(180deg, #fbf7ee 0%, #efe4d2 100%);
+      }
+
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+
+      .panel {
+        background: rgba(255, 252, 247, 0.88);
+        border: 1px solid rgba(54, 36, 22, 0.12);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 18px 40px rgba(54, 36, 22, 0.08);
+      }
+
+      .panel h1,
+      .panel h2,
+      .panel p {
+        margin: 0;
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      button {
+        font: inherit;
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        background: #1f1a17;
+        color: #fff8f0;
+        cursor: pointer;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      code {
+        background: rgba(31, 26, 23, 0.06);
+        padding: 2px 6px;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel stack">
+        <h1>Root-Only Runtime Demo</h1>
+        <p>
+          The root uses <code>FunctionComponent</code>. Child rows are plain functions that return VDOM from props.
+        </p>
+        <div id="app"></div>
+      </section>
+
+      <section class="panel stack">
+        <h2>Effect Log</h2>
+        <ul id="effect-log"></ul>
+      </section>
+
+      <section class="panel stack">
+        <h2>Keyed List Identity</h2>
+        <p id="identity-log"></p>
+      </section>
+    </main>
+
+    <script type="module">
+      import {
+        FunctionComponent,
+        mountRoot,
+        useEffect,
+        useMemo,
+        useState,
+        elementNode,
+        textNode,
+      } from "/src/lib.js";
+
+      const effectLog = document.getElementById("effect-log");
+      const identityLog = document.getElementById("identity-log");
+      const domIdentityByNode = new WeakMap();
+      let nextDomIdentity = 1;
+
+      function CounterRow(props) {
+        return elementNode("p", {}, [
+          textNode(`${props.label}: ${props.value}`),
+        ]);
+      }
+
+      function readListIdentity() {
+        const items = Array.from(document.querySelectorAll('[data-demo-list="items"] > li'));
+        const summary = items.map((item) => {
+          if (!domIdentityByNode.has(item)) {
+            domIdentityByNode.set(item, nextDomIdentity);
+            nextDomIdentity += 1;
+          }
+
+          return `${item.getAttribute("data-item-id")} -> dom#${domIdentityByNode.get(item)}`;
+        });
+
+        identityLog.textContent = summary.join(" | ");
+      }
+
+      const Root = new FunctionComponent(() => {
+        const [count, setCount] = useState(0);
+        const [items, setItems] = useState([
+          { id: "a", label: "Alpha" },
+          { id: "b", label: "Beta" },
+          { id: "c", label: "Gamma" },
+        ]);
+
+        const doubled = useMemo(() => count * 2, [count]);
+
+        useEffect(() => {
+          const entry = document.createElement("li");
+          entry.textContent = `effect after commit: count=${count}, order=${items.map((item) => item.id).join(",")}`;
+          effectLog.prepend(entry);
+          readListIdentity();
+        }, [count, items]);
+
+        return elementNode("section", { className: "stack" }, [
+          elementNode("div", { className: "stack" }, [
+            CounterRow({ label: "Root count", value: String(count) }),
+            CounterRow({ label: "Memo doubled", value: String(doubled) }),
+            CounterRow({
+              label: "Child component",
+              value: "This row is rendered by a plain function.",
+            }),
+          ]),
+          elementNode("div", { className: "controls" }, [
+            elementNode("button", {
+              onclick: () => setCount((value) => value + 1),
+              type: "button",
+            }, [textNode("Increment count")]),
+            elementNode("button", {
+              onclick: () => {
+                setItems((currentItems) => [
+                  currentItems[2],
+                  currentItems[0],
+                  currentItems[1],
+                ]);
+              },
+              type: "button",
+            }, [textNode("Rotate keyed list")]),
+          ]),
+          elementNode("ul", {
+            "data-demo-list": "items",
+          }, items.map((item) => (
+            elementNode("li", {
+              key: item.id,
+              "data-item-id": item.id,
+            }, [textNode(item.label)])
+          ))),
+        ]);
+      });
+
+      mountRoot(document.getElementById("app"), Root);
+    </script>
+  </body>
+</html>
