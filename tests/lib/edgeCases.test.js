@@ -158,13 +158,8 @@ describe("엣지 케이스", () => {
       // then
       expect(patches).toEqual([
         {
-          type: PatchType.REPLACE,
-          path: [0],
-          node: elementNode("p", {}, [textNode("C")]),
-        },
-        {
           type: PatchType.REMOVE,
-          path: [1],
+          path: [0],
         },
       ]);
       expect(
@@ -237,7 +232,7 @@ describe("엣지 케이스", () => {
       expect(removeDom.mount.innerHTML).toBe("<br>");
     });
 
-    it("앞쪽 삽입 시 뒤 형제 identity를 재사용하지 않는다", () => {
+    it("앞쪽 삽입 시 뒤 형제 DOM identity를 유지한다", () => {
       // given
       const { root } = makeDom(`
         <div id="root">
@@ -262,36 +257,16 @@ describe("엣지 케이스", () => {
       // then
       expect(patches).toEqual([
         {
-          type: PatchType.PROPS,
-          path: [0],
-          props: { id: "a" },
-        },
-        {
-          type: PatchType.TEXT,
-          path: [0, 0],
-          value: "A",
-        },
-        {
-          type: PatchType.PROPS,
-          path: [1],
-          props: { id: "b" },
-        },
-        {
-          type: PatchType.TEXT,
-          path: [1, 0],
-          value: "B",
-        },
-        {
           type: PatchType.ADD,
-          path: [2],
-          node: elementNode("span", { id: "c" }, [textNode("C")]),
+          path: [0],
+          node: elementNode("span", { id: "a" }, [textNode("A")]),
         },
       ]);
       expect(root.outerHTML).toBe(
         '<div id="root"><span id="a">A</span><span id="b">B</span><span id="c">C</span></div>',
       );
-      expect(root.childNodes[1]).not.toBe(before[0]);
-      expect(root.childNodes[2]).not.toBe(before[1]);
+      expect(root.childNodes[1]).toBe(before[0]);
+      expect(root.childNodes[2]).toBe(before[1]);
     });
 
     it("형제 reorder를 인덱스 기반 텍스트 업데이트로 처리한다", () => {
@@ -331,6 +306,45 @@ describe("엣지 케이스", () => {
       expect(root.outerHTML).toBe("<ul><li>B</li><li>A</li></ul>");
       expect(root.childNodes[0]).toBe(before[0]);
       expect(root.childNodes[1]).toBe(before[1]);
+    });
+
+    it("fully keyed sibling reorder는 MOVE로 기존 DOM identity를 유지한다", () => {
+      // given
+      const { root } = makeDom(`
+        <ul>
+          <li>A</li>
+          <li>B</li>
+          <li>C</li>
+        </ul>
+      `);
+      const before = captureChildren(root);
+      const oldVdom = elementNode("ul", {}, [
+        elementNode("li", { key: "a" }, [textNode("A")]),
+        elementNode("li", { key: "b" }, [textNode("B")]),
+        elementNode("li", { key: "c" }, [textNode("C")]),
+      ]);
+      const newVdom = elementNode("ul", {}, [
+        elementNode("li", { key: "c" }, [textNode("C")]),
+        elementNode("li", { key: "a" }, [textNode("A")]),
+        elementNode("li", { key: "b" }, [textNode("B")]),
+      ]);
+
+      // when
+      const { patches } = patchFrom(oldVdom, newVdom, root);
+
+      // then
+      expect(patches).toEqual([
+        {
+          type: PatchType.MOVE,
+          path: [],
+          fromIndex: 2,
+          toIndex: 0,
+        },
+      ]);
+      expect(root.outerHTML).toBe("<ul><li>C</li><li>A</li><li>B</li></ul>");
+      expect(root.childNodes[0]).toBe(before[2]);
+      expect(root.childNodes[1]).toBe(before[0]);
+      expect(root.childNodes[2]).toBe(before[1]);
     });
   });
 
