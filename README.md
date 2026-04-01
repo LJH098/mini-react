@@ -1,3 +1,5 @@
+<img width="490" height="489" alt="image" src="https://github.com/user-attachments/assets/6b3b3160-0408-4fd3-ab25-f992cbb6b9fa" />
+
 # mini-react
 
 > Virtual DOM 엔진 위에 올린 루트 전용 React runtime - Component, State, Hooks를 직접 구현하며 학습하는 프로젝트
